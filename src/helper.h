@@ -1,6 +1,7 @@
 #ifndef PORCHLIGHTSHELPER_H
 #define PORCHLIGHTSHELPER_H
   #include <Arduino.h>
+  #include "settings.h"
   #include <EEPROM.h>
     #define EPP_DATA_START 1000
     #define EPP_DATA_SIZE  2
@@ -250,7 +251,7 @@
       bool begin(bool debugmode);
 
       bool applySettings(); // defualt user settings
-      bool applySettings(double batterysavervolts, double ledstripbrightness, uint32_t fadedelay, uint8_t outsidelighttrigger, double temptomaintain, double minlighttemp, uint8_t dcolor[3][4]);
+      bool applySettings(uint8_t dcolor[3][4]);
 
       bool sleep(period_t period);
       bool sleep(period_t period, uint8_t multiplier);

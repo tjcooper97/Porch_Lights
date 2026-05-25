@@ -1,24 +1,3 @@
-#define EnableDebuggingMode         false
-#define EEPROMDaysToPrint           30
-
-#define EnableBatterySaverAtVoltage 3.35
-
-#define MinimumChargeTemperature    34
-#define MaximumChargeTemperature    110
-#define MaximumHeatingTemperature   40
-#define TempToMaintain              28
-#define MinimumLightTemperature     30
-
-#define LEDStripMaxBrightness       80
-#define LEDStripFadeDelay           15
-#define LightPercentConsideredDark  5
-
-
-
-
-
-
-
 #include "helper.h"
   PorchLightSystem sys;
   
@@ -41,10 +20,10 @@ void setup() {
 
   wdt_reset();
   uint8_t defaultcolors[3][4] = {{0,0,0,255}, {0,0,0,0}, {0,0,0,0}};
-  sys.applySettings(EnableBatterySaverAtVoltage, LEDStripMaxBrightness, LEDStripFadeDelay, LightPercentConsideredDark, TempToMaintain, MinimumLightTemperature, defaultcolors);
+  sys.applySettings(defaultcolors);
 
   wdt_reset();
-  if (sys.begin(EnableDebuggingMode)) {
+  if (sys.begin(DebugMode)) {
     sys.battery.setMaximumHeatingTemperature(MaximumHeatingTemperature);
     sys.battery.setMinimumChargeTemperature(MinimumChargeTemperature);
     sys.battery.setMaximumChargeTemperature(MaximumChargeTemperature);

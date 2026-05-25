@@ -513,15 +513,15 @@ bool PorchLightSystem::begin(bool debugmode) {
 
 bool PorchLightSystem::applySettings() { 
   uint8_t defaultcolor[3][4] = {{0,0,0,255}, {0,0,0,0}, {0,0,0,0}};
-  return applySettings(3.4, 75, 15, 3, 30, 32, defaultcolor);
+  return applySettings(defaultcolor);
 }
-bool PorchLightSystem::applySettings(double batterysavervolts, double ledstripbrightness, uint32_t fadedelay, uint8_t outsidelighttrigger, double temptomaintain, double minlighttemp, uint8_t dcolor[3][4]) {
-  _minlighttemp        = minlighttemp        < 28  ? 28  : minlighttemp;
-  _temptomaintain      = temptomaintain      < 28  ? 28  : temptomaintain;
-  _batterysavervolts   = batterysavervolts   < 3.3 ? 3.3 : batterysavervolts;
-  _ledstripbrightness  = ledstripbrightness  > 100 ? 100 : ledstripbrightness;
-  _fadedelay           = fadedelay;
-  _outsidelighttrigger = outsidelighttrigger;
+bool PorchLightSystem::applySettings(uint8_t dcolor[3][4]) {
+  _minlighttemp        = MinimumLightTemperature;
+  _temptomaintain      = TempToMaintain;
+  _batterysavervolts   = EnableBatterySaverAtVoltage;
+  _ledstripbrightness  = LEDStripMaxBrightness;
+  _fadedelay           = LEDStripFadeDelay;
+  _outsidelighttrigger = LightPercentConsideredDark;
 
   uint8_t dcy = 0;
   for (uint8_t dcx = 0; dcx < 3; dcx++) { for (dcy = 0; dcy < 4; dcy++) { _dcolor[dcx][dcy] = dcolor[dcx][dcy]; }; };
