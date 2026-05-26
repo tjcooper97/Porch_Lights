@@ -126,35 +126,25 @@
     // Temperature control
       double _temperature[2];
       bool   _heateron;
-      double _maxheattemp;
 
     // Charge control
       bool   _chargeavailable;
       bool   _chargingenabled;
-      double _minchargetemp;
-      double _maxchargetemp;
 
     public:
       PBattery();
       bool reset();
-      bool reset(double minchargetemp, double maxchargetemp, double maxheattemp);
       bool begin();
-      bool begin(double minchargetemp, double maxchargetemp, double maxheattemp);
 
       bool foundMax();
 
       bool getNewReadings();
 
-      bool setMaximumHeatingTemperature(double maxheattemp);
       bool isHeatingAllowed();
       bool isHeating();
       bool enableHeater();
       bool disableHeater();
 
-      bool   setMinimumChargeTemperature(double minchargetemp);
-      bool   setMaximumChargeTemperature(double maxchargetemp);
-      double getMinimumChargeTemperature();
-      double getMaximumChargeTemperature();
       bool   isChargingAvailable();
       bool   isChargingAllowed();
       bool   isChargingEnabled();
@@ -226,8 +216,6 @@
     // Settings
       bool     _debugmode;           // Debug mode speeds up thread execution, prints to the serial monitor, and disables (long) sleeping
       double   _minlighttemp;        // Minimum temperature (read from the DS3231) LEDs are allowed to be lit (this value is inclusive; i.e. if the MinOpTemp is 32 & RTCTemp is 32, the LEDs will be able to light)
-      double   _temptomaintain;      // Temperature we should try to maintain regardless of time of day/charge availability
-      double   _batterysavervolts;   // 3.3+
       double   _ledstripbrightness;  // Max brightness of the pixels
       uint32_t _fadedelay;           // How long to delay the fade (in milliseconds) between each click (there are 100) in FadeOn or FadeOff
       uint8_t  _outsidelighttrigger; // Value at which the LEDs will turn on early (i.e. 8 is on regardless, 6-8 comes on if olite <= olitetrigger)
@@ -267,9 +255,7 @@
       
       bool getDebugMode();
 
-      double  getTempToMaintain();
       bool    inBatterySaverMode();
-      double  getBatterySaverVoltage();
 
       double   getMinimumLightTemp();
       double   getMaxLEDStripBrightness();

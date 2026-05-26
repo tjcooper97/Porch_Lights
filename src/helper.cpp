@@ -48,30 +48,21 @@ PBattery::PBattery() {
   reset(); 
 }
 
-bool PBattery::reset() { return reset(38,99,45); }
-bool PBattery::reset(double minchargetemp, double maxchargetemp, double maxheattemp) {
+bool PBattery::reset() {
   _voltage    = 0;
   
   _temperature[0] = 0;
   _temperature[1] = 0;
   _heateron       = false;
-  _maxheattemp    = maxheattemp > 60 ? 60 : maxheattemp;
   
   _chargeavailable = false;
   _chargingenabled = false;
-  _minchargetemp   = minchargetemp < 38 ? 38 : minchargetemp;
-  _maxchargetemp   = (maxchargetemp > 99) || (maxchargetemp < _minchargetemp) ? 99  : maxchargetemp;
 
   return true;
 }
 
-bool PBattery::begin() { return begin(_minchargetemp, _maxchargetemp, _maxheattemp); };
-bool PBattery::begin(double minchargetemp, double maxchargetemp, double maxheattemp) {
+bool PBattery::begin() {
   if (_setupcomplete) { return true; };
-  
-  _maxheattemp   = maxheattemp    > 60 ? 60 : maxheattemp;
-  _minchargetemp = minchargetemp  < 38 ? 38 : minchargetemp;
-  _maxchargetemp = (maxchargetemp > 99) || (maxchargetemp < _minchargetemp) ? 99  : maxchargetemp;
 
   _ntc[0] = new NTC_Thermistor(PIN_BTEMP1,10000,10000,25,3950);
   _ntc[1] = new NTC_Thermistor(PIN_BTEMP2,10000,10000,25,3950);
@@ -120,10 +111,9 @@ bool PBattery::getNewReadings() {
 
 
 
-bool PBattery::setMaximumHeatingTemperature(double maxheattemp) { if (maxheattemp > 60) { return false; }; _maxheattemp = maxheattemp; return true; }
 bool PBattery::isHeatingAllowed() { 
   if (!_setupcomplete) { return false; };
-  if (getTemperature() > _maxheattemp) { return false; };
+  if (getTemperature() > MaximumHeatingTemperature) { return false; };
   if (_foundmax && _voltage < (_chargeavailable ? 3.2 : 3.35)) { return false; };
   return true;
 }
@@ -131,7 +121,7 @@ bool PBattery::isHeating() { return _heateron; }
 
 bool PBattery::enableHeater() {
   if (!_setupcomplete) { return false; };
-  if (getTemperature() > _maxheattemp) { disableHeater(); return false; };
+  if (getTemperature() > MaximumHeatingTemperature) { disableHeater(); return false; };
 
   _heateron = true;
   digitalWrite(PIN_BHEAT, HIGH);
@@ -148,12 +138,8 @@ bool PBattery::disableHeater() {
 
 
 
-bool   PBattery::setMinimumChargeTemperature(double minchargetemp) { if (minchargetemp < 38) { return false; }; _minchargetemp = minchargetemp; return true; }
-bool   PBattery::setMaximumChargeTemperature(double maxchargetemp) { if (maxchargetemp > 99) { return false; }; _maxchargetemp = maxchargetemp; return true; }
-double PBattery::getMinimumChargeTemperature()                     { return _minchargetemp; }
-double PBattery::getMaximumChargeTemperature()                     { return _maxchargetemp; }
 bool   PBattery::isChargingAvailable() { return !_setupcomplete ? false : _chargeavailable; }
-bool   PBattery::isChargingAllowed()   { return (_setupcomplete && (getTemperature() >= _minchargetemp) && (getTemperature() <= _maxchargetemp)); }
+bool   PBattery::isChargingAllowed()   { return (_setupcomplete && (getTemperature() >= MinimumChargeTemperature) && (getTemperature() <= MaximumChargeTemperature)); }
 bool   PBattery::isChargingEnabled()   { return !_setupcomplete ? false : _chargingenabled; }
 bool   PBattery::isCharging()          { return !_setupcomplete ? false : (_chargingenabled && _chargeavailable); }
 bool   PBattery::enableCharging() { 
@@ -512,8 +498,6 @@ bool PorchLightSystem::applySettings() {
 }
 bool PorchLightSystem::applySettings(uint8_t dcolor[3][4]) {
   _minlighttemp        = MinimumLightTemperature;
-  _temptomaintain      = TempToMaintain;
-  _batterysavervolts   = EnableBatterySaverAtVoltage;
   _ledstripbrightness  = LEDStripMaxBrightness;
   _fadedelay           = LEDStripFadeDelay;
   _outsidelighttrigger = LightPercentConsideredDark;
@@ -579,7 +563,7 @@ bool PorchLightSystem::getNewBatteryReadings() {
     Serial.print(F("  |  CEnabl:= ")); Serial.println(battery.isCharging() ? "True" : "False");
   };
 
-  _batterysaver = _debugmode ? false : (!battery.foundMax() || battery.getVoltage() < _batterysavervolts);
+  _batterysaver = _debugmode ? false : (!battery.foundMax() || battery.getVoltage() < EnableBatterySaverAtVoltage);
 
   return gotnewreadings;
 }
@@ -641,9 +625,7 @@ uint8_t PorchLightSystem::getAmbientLight() { return _setupcomplete ? _ambientli
 
 bool PorchLightSystem::getDebugMode() { return _debugmode; }
 
-double PorchLightSystem::getTempToMaintain()      { return _temptomaintain; }
 bool   PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
-double PorchLightSystem::getBatterySaverVoltage() { return _batterysavervolts; }
 
 double   PorchLightSystem::getMinimumLightTemp()      { return _minlighttemp; }
 double   PorchLightSystem::getMaxLEDStripBrightness() { return _ledstripbrightness; }

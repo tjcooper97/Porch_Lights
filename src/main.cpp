@@ -24,10 +24,6 @@ void setup() {
 
   wdt_reset();
   if (sys.begin(DebugMode)) {
-    sys.battery.setMaximumHeatingTemperature(MaximumHeatingTemperature);
-    sys.battery.setMinimumChargeTemperature(MinimumChargeTemperature);
-    sys.battery.setMaximumChargeTemperature(MaximumChargeTemperature);
-
     if (EEPROM.read(0) != 17) { for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,17); };
 
     if (!sys.getDebugMode()) { sys.ledstrip.demo(); }
@@ -106,17 +102,17 @@ void thread_Battery() {
   sys.thrd[t_system].setTriggered(true);
   sys.getNewBatteryReadings();
 
-  while (sys.battery.getTemperature() < sys.getTempToMaintain() && sys.battery.isHeatingAllowed()) {
+  while (sys.battery.getTemperature() < TempToMaintain && sys.battery.isHeatingAllowed()) {
     if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
-    if (sys.getDebugMode()) { sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(sys.getTempToMaintain()); Serial.println(F("* F")); };
+    if (sys.getDebugMode()) { sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(TempToMaintain); Serial.println(F("* F")); };
     sys.sleep(SLEEP_8S,4);
     sys.getNewBatteryReadings();
   };
 
   if (sys.battery.isChargingAvailable()) {
-    while (sys.battery.getTemperature() < sys.battery.getMinimumChargeTemperature() && sys.battery.isHeatingAllowed()) {
+    while (sys.battery.getTemperature() < MinimumChargeTemperature && sys.battery.isHeatingAllowed()) {
       if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
-      if (sys.getDebugMode()) { sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(sys.battery.getMinimumChargeTemperature()); Serial.println(F("* F")); };
+      if (sys.getDebugMode()) { sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(MinimumChargeTemperature); Serial.println(F("* F")); };
       sys.sleep(SLEEP_8S,4);
       sys.getNewBatteryReadings();
     };
