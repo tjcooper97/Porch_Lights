@@ -347,9 +347,10 @@ bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
     ci = 0;
     for (pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
       if (ci >= _colorcount) { ci = 0; };
-      if      (!pled[pi].isallowed)          { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,0)); }
-      else if (pled[pi].section == SP_STAIR) { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,uint8_t((255*bl)/100))); }
-      else                                   { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(tcolor[ci][0],tcolor[ci][1],tcolor[ci][2],tcolor[ci][3])); ci++; };
+      if      (!pled[pi].isallowed)           { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,0)); }
+      else if (pled[pi].section == SP_STAIR
+            || pled[pi].section == SP_STAIRA) { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,uint8_t((255*bl)/100))); }
+      else                                    { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(tcolor[ci][0],tcolor[ci][1],tcolor[ci][2],tcolor[ci][3])); ci++; };
     };
     _strip.show();
     delay(fadedelay);
