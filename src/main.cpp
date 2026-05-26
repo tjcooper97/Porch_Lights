@@ -176,6 +176,7 @@ void thread_LED() {
   uint16_t lsi = 0;
   uint8_t  lss = 0;
   bool     shouldallow = false;
+  bool     altstairpattern = (latenight || bv < 3.71);
   uint8_t  ledchanges  = 0;
   uint8_t  ledson      = 0;
   for (uint8_t pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
@@ -183,7 +184,9 @@ void thread_LED() {
     lss = sys.ledstrip.getLEDSection(pi);
     shouldallow = false;
 
-    if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || (lsi >= SP_STAIR_7 && lsi <= SP_STAIR_10)) { shouldallow = true; }
+    if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || lsi == SP_STAIR_7  || lsi == SP_STAIR_10) { shouldallow = true; }
+    else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairpattern; }
+    else if (lsi == SP_STAIR_A2)                       { shouldallow = altstairpattern; }
     else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = latenight ? false : bv >= 4.00; }
     else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = latenight ? false : bv >= 3.85; }
     else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = latenight ? false : bv >= 3.81; }
@@ -194,9 +197,16 @@ void thread_LED() {
     else if (lss == SP_LEFTR)                          { shouldallow = latenight ? false : bv >= 3.67; }
     else if (lss == SP_FRONT1)                         { shouldallow = latenight ? false : bv >= 3.64; }
     else if (lss == SP_FRONT3)                         { shouldallow = latenight ? false : bv >= 3.61; }
-    else if (lss == SP_FRONT2)                         { shouldallow = bv >= 3.58; }
+    else if (lss == SP_FRONT2)                         { shouldallow = latenight ? false : bv >= 3.58; }
     else if (lss == SP_RITER)                          { shouldallow = bv >= 3.54; }
-    else if (lss == SP_STAIR)                          { shouldallow = bv >= 3.45; };
+    else if (lss == SP_STAIR || lsi == SP_STAIR_A1)    { 
+      if (bv < 3.45) { shouldallow = false; }
+      else {
+        if      (lsi == SP_STAIR_1 || SP_STAIR_4) { shouldallow = true; }
+        else if (lsi == SP_STAIR_A1)              { shouldallow = altstairpattern; }
+        else                                      { shouldallow = !altstairpattern; };
+      };
+    };
 
     if (sys.ledstrip.getLEDIsAllowed(pi) != shouldallow) { ledchanges++; somethingchanged = true; sys.ledstrip.setLEDIsAllowed(pi, shouldallow); };
     ledson+=shouldallow;

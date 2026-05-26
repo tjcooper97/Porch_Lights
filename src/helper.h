@@ -26,7 +26,7 @@
   
   // LED Strip
     #define LEDSTRIP_COUNT  476 // Total number of NeoPixels in the strip
-    #define LEDSTRIP_UCOUNT 34  // Number of NeoPixels we are using in the strip (the others are off)
+    #define LEDSTRIP_UCOUNT 36  // Number of NeoPixels we are using in the strip (the others are off)
 
   // Holidays
     #define HOLIDAY_NOTSETUP     255
@@ -59,7 +59,8 @@
     #define SP_FRONT2 4
     #define SP_FRONT3 5
     #define SP_STAIR  6
-    #define SP_RITER  7
+    #define SP_STAIRA 7
+    #define SP_RITER  8
 
   // LED Pixel Positions
     #define SP_LEFTF_1 4
@@ -89,12 +90,14 @@
     
     #define SP_STAIR_1  296
     #define SP_STAIR_2  306
+    #define SP_STAIR_A1 310
     #define SP_STAIR_3  315
     #define SP_STAIR_4  325
     #define SP_STAIR_5  326
     #define SP_STAIR_6  327
     #define SP_STAIR_7  328
     #define SP_STAIR_8  338
+    #define SP_STAIR_A2 343
     #define SP_STAIR_9  347
     #define SP_STAIR_10 357  
     

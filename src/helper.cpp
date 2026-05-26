@@ -6,20 +6,6 @@ Thermistor*       _ntc[2];
 TDS3231           _rtc;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 uint32_t period_t_millis(period_t period) {
   if      (period == SLEEP_15MS)  { return 15; }
   else if (period == SLEEP_30MS)  { return 30; }
@@ -33,6 +19,11 @@ uint32_t period_t_millis(period_t period) {
   else if (period == SLEEP_8S)    { return 8000; };
   return 0;
 }
+
+
+
+
+
 
 
 
@@ -272,6 +263,9 @@ PLEDStrip::PLEDStrip() {
   cp++; pled[cp].stripindex = SP_STAIR_8;  pled[cp].section = SP_STAIR;
   cp++; pled[cp].stripindex = SP_STAIR_9;  pled[cp].section = SP_STAIR;
   cp++; pled[cp].stripindex = SP_STAIR_10; pled[cp].section = SP_STAIR;
+
+  cp++; pled[cp].stripindex = SP_STAIR_A1; pled[cp].section = SP_STAIRA;
+  cp++; pled[cp].stripindex = SP_STAIR_A2; pled[cp].section = SP_STAIRA;
   
   cp++; pled[cp].stripindex = SP_RITER_1; pled[cp].section = SP_RITER;
   cp++; pled[cp].stripindex = SP_RITER_2; pled[cp].section = SP_RITER;
