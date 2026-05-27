@@ -198,9 +198,9 @@ void thread_LED() {
     else if (lss == SP_STAIR || lsi == SP_STAIR_A1)    { 
       if (bv < 3.45) { shouldallow = false; }
       else {
-        if      (lsi == SP_STAIR_1 || SP_STAIR_4) { shouldallow = true; }
-        else if (lsi == SP_STAIR_A1)              { shouldallow = altstairpattern; }
-        else                                      { shouldallow = !altstairpattern; };
+        if      (lsi == SP_STAIR_1 || lsi == SP_STAIR_4) { shouldallow = true; }
+        else if (lsi == SP_STAIR_A1)                     { shouldallow = altstairpattern; }
+        else                                             { shouldallow = !altstairpattern; };
       };
     };
 
