@@ -44,9 +44,9 @@
   // Input/Output Pins
     #define PIN_OLITE    A0 // Ambient light sensor
     #define PIN_BTEMP1H  A1 // Battery temp sensor 1 5v
-    #define PIN_BTEMP1   A2 // Battery temp sensor 1
+    #define PIN_BTEMP1   A2 // Battery temp sensor 1 Input
     #define PIN_BTEMP2H  A3 // Battery temp sensor 2 5v
-    #define PIN_BTEMP2   A4 // Battery temp sensor 2
+    #define PIN_BTEMP2   A4 // Battery temp sensor 2 Input
     #define PIN_BHEAT    2  // Battery heater enable pin
     #define PIN_CENABLE  3  // CE (charge enable) on both of the solar chips (allowing for control over charging)
     #define PIN_PGOOD    4  // PGOOD from one of the solar chargers (indicating charge is available)
@@ -210,8 +210,8 @@
   class PorchLightSystem {
     private:
     // Current statuses
-      bool _setupcomplete; // Set to true after begin()
-      bool _batterysaver;  // When turned on, brightness levels are reduced at twice the speed of normal based on BMode. Section turn off is also sped up by BMode+1 when turned on.
+      bool _setupcomplete;
+      bool _batterysaver;
     
     // Settings
       bool     _debugmode;           // Debug mode speeds up thread execution, prints to the serial monitor, and disables (long) sleeping
@@ -241,7 +241,7 @@
       bool begin(); // calls begin(false)
       bool begin(bool debugmode);
 
-      bool applySettings(); // defualt user settings
+      bool applySettings(); // defualt user colors
       bool applySettings(uint8_t dcolor[3][4]);
 
       bool sleep(period_t period);
@@ -249,7 +249,7 @@
 
       bool getNewSensorReadings();
       bool getNewBatteryReadings();
-      bool getNewTimeData(); // Not done
+      bool getNewTimeData();
 
       uint8_t getAmbientLight();
       
