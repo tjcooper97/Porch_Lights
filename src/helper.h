@@ -214,7 +214,6 @@
       bool _batterysaver;
     
     // Settings
-      bool     _debugmode;           // Debug mode speeds up thread execution, prints to the serial monitor, and disables (long) sleeping
       double   _minlighttemp;        // Minimum temperature (read from the DS3231) LEDs are allowed to be lit (this value is inclusive; i.e. if the MinOpTemp is 32 & RTCTemp is 32, the LEDs will be able to light)
       double   _ledstripbrightness;  // Max brightness of the pixels
       uint32_t _fadedelay;           // How long to delay the fade (in milliseconds) between each click (there are 100) in FadeOn or FadeOff
@@ -238,11 +237,10 @@
 
     public:
       PorchLightSystem();
-      bool begin(); // calls begin(false)
-      bool begin(bool debugmode);
+      bool begin();
 
-      bool applySettings(); // defualt user colors
-      bool applySettings(uint8_t dcolor[3][4]);
+      bool setDefaultColors(); // defualt user colors
+      bool setDefaultColors(uint8_t dcolor[3][4]);
 
       bool sleep(period_t period);
       bool sleep(period_t period, uint8_t multiplier);
@@ -252,8 +250,6 @@
       bool getNewTimeData();
 
       uint8_t getAmbientLight();
-      
-      bool getDebugMode();
 
       bool    inBatterySaverMode();
 
