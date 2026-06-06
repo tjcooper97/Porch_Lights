@@ -213,13 +213,9 @@
       bool _setupcomplete;
       bool _batterysaver;
     
-    // Settings
-      double   _minlighttemp;        // Minimum temperature (read from the DS3231) LEDs are allowed to be lit (this value is inclusive; i.e. if the MinOpTemp is 32 & RTCTemp is 32, the LEDs will be able to light)
-      double   _ledstripbrightness;  // Max brightness of the pixels
-      uint32_t _fadedelay;           // How long to delay the fade (in milliseconds) between each click (there are 100) in FadeOn or FadeOff
-      uint8_t  _outsidelighttrigger; // Value at which the LEDs will turn on early (i.e. 8 is on regardless, 6-8 comes on if olite <= olitetrigger)
-      uint8_t  _dcolor[3][4];        // Default colors
-      uint8_t  _hcolor[3][4];        // Holiday colors
+    // Colors
+      uint8_t  _dcolor[3][4]; // Default
+      uint8_t  _hcolor[3][4]; // Holiday
 
     // Time data
       TTime_Full _now; // This is used just for printing date/time to the serial monitor (this way we aren't changing the public 'now' variable unexpectedly, but still get fresh date/time in the serial monitor)
@@ -250,13 +246,7 @@
       bool getNewTimeData();
 
       uint8_t getAmbientLight();
-
       bool    inBatterySaverMode();
-
-      double   getMinimumLightTemp();
-      double   getMaxLEDStripBrightness();
-      uint32_t getFadeDelay();
-      uint8_t  getAmbientLightTrigger();
 
       bool serialPrintDateTime();
 

@@ -495,14 +495,8 @@ bool PorchLightSystem::setDefaultColors() {
   return setDefaultColors(defaultcolor);
 }
 bool PorchLightSystem::setDefaultColors(uint8_t dcolor[3][4]) {
-  _minlighttemp        = MinimumLightTemperature;
-  _ledstripbrightness  = LEDStripMaxBrightness;
-  _fadedelay           = LEDStripFadeDelay;
-  _outsidelighttrigger = LightPercentConsideredDark;
-
   uint8_t dcy = 0;
   for (uint8_t dcx = 0; dcx < 3; dcx++) { for (dcy = 0; dcy < 4; dcy++) { _dcolor[dcx][dcy] = dcolor[dcx][dcy]; }; };
-
   return true;
 }
 
@@ -612,6 +606,7 @@ bool PorchLightSystem::getNewTimeData() {
   return true;
 }
 
+
 bool PorchLightSystem::_storeBatteryDataToEEPROM(uint16_t sadr) {
   EEPROM.update(sadr,  uint8_t(battery.getTemperature()));
   EEPROM.update(sadr+1,uint8_t((battery.getVoltage()*100)-200));
@@ -620,13 +615,7 @@ bool PorchLightSystem::_storeBatteryDataToEEPROM(uint16_t sadr) {
 
 
 uint8_t PorchLightSystem::getAmbientLight() { return _setupcomplete ? _ambientlight : 0; }
-
-bool   PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
-
-double   PorchLightSystem::getMinimumLightTemp()      { return _minlighttemp; }
-double   PorchLightSystem::getMaxLEDStripBrightness() { return _ledstripbrightness; }
-uint32_t PorchLightSystem::getFadeDelay()             { return _fadedelay; }
-uint8_t  PorchLightSystem::getAmbientLightTrigger()   { return _outsidelighttrigger; }
+bool    PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
 
 
 bool PorchLightSystem::serialPrintDateTime() {
@@ -664,6 +653,7 @@ bool PorchLightSystem::updateLEDColor() {
 
   return ledstrip.setColor(_hcolor); 
 }
+
 
 bool    PorchLightSystem::getFoundRTC()        { return _foundrtc; }
 uint8_t PorchLightSystem::getCurrentHoliday()  { return (!_setupcomplete || _holiday == HOLIDAY_NOTSETUP) ? HOLIDAY_NONE : _holiday; }

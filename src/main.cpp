@@ -125,7 +125,7 @@ void thread_Battery() {
   if (sys.inBatterySaverMode()) {
     if (sys.getThreadPriority() != tp_HIGH) {
       if (DebugMode) { sys.serialPrintDateTime(); Serial.println(F("Entering battery saver mode")); };
-      if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,sys.getFadeDelay()); };
+      if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,LEDStripFadeDelay); };
       sys.setThreadPriority(tp_HIGH);
     };
     sys.sleep(SLEEP_8S,8);
@@ -142,17 +142,17 @@ void thread_System() {
   if (sys.getFoundRTC()) { 
     TimeOfDay tod = sys.now.getTimeOfDay();
     if      (tod == TOD_NIGHT || tod == TOD_MIDNIGHT || tod == TOD_MORNNIGHT)                 { allowleds = true; }
-    else if (tod == TOD_DAWN  || tod == TOD_SUNRISE  || tod == TOD_SUNSET || tod == TOD_DUSK) { allowleds = (sys.getAmbientLight() <= sys.getAmbientLightTrigger()); };
+    else if (tod == TOD_DAWN  || tod == TOD_SUNRISE  || tod == TOD_SUNSET || tod == TOD_DUSK) { allowleds = (sys.getAmbientLight() <= LightPercentConsideredDark); };
   }
-  else { allowleds = (sys.getAmbientLight() <= sys.getAmbientLightTrigger()); };
+  else { allowleds = (sys.getAmbientLight() <= LightPercentConsideredDark); };
 
-  if (sys.battery.getTemperature() < sys.getMinimumLightTemp() || sys.battery.isChargingAvailable() || sys.thrd[t_led].getPaused()) { allowleds = false; };
+  if (sys.battery.getTemperature() < MinimumLightTemperature || sys.battery.isChargingAvailable() || sys.thrd[t_led].getPaused()) { allowleds = false; };
 
   if (allowleds) {
     if (sys.getThreadPriority() > tp_LOW) { sys.setThreadPriority(tp_LOW); if (DebugMode) { sys.serialPrintDateTime(); Serial.println(F("LEDs enabled")); }; };
   }
   else {
-    if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,sys.getFadeDelay()); };
+    if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,LEDStripFadeDelay); };
     if (sys.getThreadPriority() < tp_MED) { sys.setThreadPriority(tp_MED); if (DebugMode) { sys.serialPrintDateTime(); Serial.println(F("LEDs disabled")); }; };
   };
   sys.thrd[t_led].setTriggered(allowleds);
@@ -209,7 +209,7 @@ void thread_LED() {
   };
   
   uint8_t calcdbrightness = 0;
-  uint8_t mbrn = latenight ? 30 : 90; mbrn = mbrn > sys.getMaxLEDStripBrightness() ? sys.getMaxLEDStripBrightness() : mbrn;
+  uint8_t mbrn = latenight ? 30 : 90; mbrn = mbrn > LEDStripMaxBrightness ? LEDStripMaxBrightness : mbrn;
   if (sys.battery.foundMax()) {
     uint8_t sb = 0;
     if      (bv > 4.03) { sb = 80; }
@@ -232,6 +232,6 @@ void thread_LED() {
 
   if (somethingchanged) { 
     if (DebugMode) { sys.serialPrintDateTime(); Serial.println("Updating (" + String(ledchanges) + ") LEDs  |  LEDs On: " + String(ledson) + "/" + String(LEDSTRIP_UCOUNT) + "  |  Brightness: " + String(calcdbrightness) + "%"); };
-    if (!sys.ledstrip.setBrightness(calcdbrightness, sys.getFadeDelay())) { sys.thrd[t_led].setPaused(true); if (DebugMode) { sys.serialPrintDateTime(); Serial.println(F("LED thread paused due to error during update")); }; }; 
+    if (!sys.ledstrip.setBrightness(calcdbrightness, LEDStripFadeDelay)) { sys.thrd[t_led].setPaused(true); if (DebugMode) { sys.serialPrintDateTime(); Serial.println(F("LED thread paused due to error during update")); }; }; 
   };
 }
