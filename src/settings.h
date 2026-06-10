@@ -1,5 +1,5 @@
 #define DebugMode                   false
-#define EEPROMDaysToPrint           45
+#define EEPROMDaysToPrint           30
 
 #define EnableBatterySaverAtVoltage 3.35
 
