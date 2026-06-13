@@ -212,12 +212,10 @@ void thread_LED() {
 
   if (sys.getFoundRTC()) { if (sys.now.getHour() == 0 && sys.now.getMin() <= 10) { somethingchanged = true; }; }; // Just in case we switched to a day that now is a holiday but otherwise had no other reason to update i guess
 
-  bool latenight = !sys.getFoundRTC() ? (bv < 3.8) : (((bv < 3.8 || sys.battery.getTemperature() < TEMP_RANGE_UPPER) && sys.now.getHour() >= 23) || sys.now.getHour() <= 2);
-
   uint16_t lsi = 0;
   uint8_t  lss = 0;
   bool     shouldallow = false;
-  bool     altstairpattern = (latenight || bv < 3.71);
+  bool     altstairpattern = (sys.isLateNight() || bv < 3.71);
   uint8_t  ledchanges  = 0;
   uint8_t  ledson      = 0;
   for (uint8_t pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
@@ -228,17 +226,17 @@ void thread_LED() {
     if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || lsi == SP_STAIR_7  || lsi == SP_STAIR_10) { shouldallow = true; }
     else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairpattern; }
     else if (lsi == SP_STAIRA_2)                       { shouldallow = altstairpattern; }
-    else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = latenight ? false : bv >= 4.00; }
-    else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = latenight ? false : bv >= 3.85; }
-    else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = latenight ? false : bv >= 3.81; }
-    else if (lsi == SP_FRONT_6  || lsi == SP_FRONT_8)  { shouldallow = latenight ? false : bv >= 3.78; }
-    else if (lsi == SP_FRONT_10 || lsi == SP_FRONT_12) { shouldallow = latenight ? false : bv >= 3.75; }
-    else if (lsi == SP_RITER_2  || lsi == SP_RITER_4)  { shouldallow = latenight ? false : bv >= 3.72; }
-    else if (lss == SP_LEFTF)                          { shouldallow = latenight ? false : bv >= 3.69; }
-    else if (lss == SP_LEFTR)                          { shouldallow = latenight ? false : bv >= 3.67; }
-    else if (lss == SP_FRONT1)                         { shouldallow = latenight ? false : bv >= 3.64; }
-    else if (lss == SP_FRONT3)                         { shouldallow = latenight ? false : bv >= 3.61; }
-    else if (lss == SP_FRONT2)                         { shouldallow = latenight ? false : bv >= 3.58; }
+    else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = sys.isLateNight() ? false : bv >= 4.00; }
+    else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.85; }
+    else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.81; }
+    else if (lsi == SP_FRONT_6  || lsi == SP_FRONT_8)  { shouldallow = sys.isLateNight() ? false : bv >= 3.78; }
+    else if (lsi == SP_FRONT_10 || lsi == SP_FRONT_12) { shouldallow = sys.isLateNight() ? false : bv >= 3.75; }
+    else if (lsi == SP_RITER_2  || lsi == SP_RITER_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.72; }
+    else if (lss == SP_LEFTF)                          { shouldallow = sys.isLateNight() ? false : bv >= 3.69; }
+    else if (lss == SP_LEFTR)                          { shouldallow = sys.isLateNight() ? false : bv >= 3.67; }
+    else if (lss == SP_FRONT1)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.64; }
+    else if (lss == SP_FRONT3)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.61; }
+    else if (lss == SP_FRONT2)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.58; }
     else if (lss == SP_RITER)                          { shouldallow = bv >= 3.54; }
     else if (lss == SP_STAIR || lsi == SP_STAIRA_1)    { 
       if (bv < 3.45) { shouldallow = false; }
@@ -254,7 +252,7 @@ void thread_LED() {
   };
   
   uint8_t calcdbrightness = 0;
-  uint8_t mbrn = latenight ? 30 : 90; mbrn = mbrn > MAXBRIGHTNESS ? MAXBRIGHTNESS : mbrn;
+  uint8_t mbrn = sys.isLateNight() ? 30 : 90; mbrn = mbrn > MAXBRIGHTNESS ? MAXBRIGHTNESS : mbrn;
   if (sys.battery.foundMax()) {
     uint8_t sb = 0;
     if      (bv > 4.03) { sb = 80; }
@@ -270,7 +268,7 @@ void thread_LED() {
     else if (bv > 3.45) { sb = 25; };
     calcdbrightness = sb < 20 ? 20 : mbrn < sb ? mbrn : sb;
   };
-  if (latenight) { calcdbrightness/=2; };
+  if (sys.isLateNight()) { calcdbrightness/=2; };
 
   calcdbrightness = calcdbrightness < 20 ? 20 : calcdbrightness > mbrn ? mbrn : calcdbrightness;
   somethingchanged = somethingchanged || (sys.ledstrip.getBrightness() != calcdbrightness);

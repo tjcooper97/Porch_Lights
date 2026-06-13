@@ -397,8 +397,9 @@ PorchLightSystem::PorchLightSystem() {
 
   _batterysaver = false;
 
-  _foundrtc = false;
-  _holiday  = HOLIDAY_NOTSETUP;
+  _foundrtc  = false;
+  _holiday   = HOLIDAY_NOTSETUP;
+  _latenight = false;
 
   _ambientlight = 0;
 
@@ -642,11 +643,15 @@ bool PorchLightSystem::_recalcHoliday() {
 
 
 bool PorchLightSystem::getNewTimeData() {
-  if (!_foundrtc) { return false; };
+  _latenight = !battery.isChargingAvailable() && (battery.getTemperature() < TEMP_RANGE_UPPER || battery.getVoltage() < 3.8);
 
+  if (!_foundrtc) { return false; };
   _now = now;
   now = _rtc.getNow();
   if (now.isDST()) { now.addTime(1,0,0); };
+
+  if      (_latenight)        { _latenight = (now.getHour() >= 23 && now.getHour() <= 3); } // max latenight mode time window
+  else if (now.getHour() < 3) { _latenight = true; }; // standard latenight mode if no other triggers
 
   if (_now.getTimeOfDay() != now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
@@ -733,5 +738,10 @@ bool PorchLightSystem::updateLEDColor() {
 }
 
 
-bool    PorchLightSystem::getFoundRTC()        { return _foundrtc; }
-uint8_t PorchLightSystem::getCurrentHoliday()  { return (!_setupcomplete || _holiday == HOLIDAY_NOTSETUP) ? HOLIDAY_NONE : _holiday; }
+bool    PorchLightSystem::getFoundRTC() const { return _foundrtc; }
+bool    PorchLightSystem::isLateNight() const { return _latenight; }
+uint8_t PorchLightSystem::getCurrentHoliday() { 
+  if (!_setupcomplete) { return HOLIDAY_NONE; };
+  if (_holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); };
+  return _holiday;
+}

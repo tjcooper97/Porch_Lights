@@ -173,6 +173,7 @@
       TTime_Full _now; // This is used just for printing date/time to the serial monitor (this way we aren't changing the public 'now' variable unexpectedly, but still get fresh date/time in the serial monitor)
       bool       _foundrtc;
       uint8_t    _holiday;
+      bool       _latenight;
       bool       _recalcHoliday();
 
     // Sensor data
@@ -216,7 +217,8 @@
       bool updateLEDColor();
 
       TTime_Full now;
-      bool    getFoundRTC();
+      bool    getFoundRTC() const;
+      bool    isLateNight() const;
       uint8_t getCurrentHoliday();
   };
 #endif
