@@ -201,7 +201,9 @@
       uint8_t getAmbientLight();
       bool    inBatterySaverMode();
 
-      bool serialPrintDateTime();
+      #if DEBUGMODE == true
+        bool serialPrintDateTime();
+      #endif
 
       TThread thrd[thrd_count];
 
