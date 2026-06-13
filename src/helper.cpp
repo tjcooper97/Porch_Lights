@@ -113,7 +113,7 @@ bool PBattery::getNewReadings() {
 
 bool PBattery::isHeatingAllowed() { 
   if (!_setupcomplete) { return false; };
-  if (getTemperature() > MaximumHeatingTemperature) { return false; };
+  if (getTemperature() > TEMP_MAX_HEAT) { return false; };
   if (_foundmax && _voltage < (_chargeavailable ? 3.2 : 3.35)) { return false; };
   return true;
 }
@@ -121,7 +121,7 @@ bool PBattery::isHeating() { return _heateron; }
 
 bool PBattery::enableHeater() {
   if (!_setupcomplete) { return false; };
-  if (getTemperature() > MaximumHeatingTemperature) { disableHeater(); return false; };
+  if (getTemperature() > TEMP_MAX_HEAT) { disableHeater(); return false; };
 
   _heateron = true;
   digitalWrite(PIN_BHEAT, HIGH);
@@ -139,7 +139,7 @@ bool PBattery::disableHeater() {
 
 
 bool   PBattery::isChargingAvailable() { return !_setupcomplete ? false : _chargeavailable; }
-bool   PBattery::isChargingAllowed()   { return (_setupcomplete && (getTemperature() >= MinimumChargeTemperature) && (getTemperature() <= MaximumChargeTemperature)); }
+bool   PBattery::isChargingAllowed()   { return (_setupcomplete && (getTemperature() >= TEMP_MIN_CHARGE) && (getTemperature() <= TEMP_MAX_CHARGE)); }
 bool   PBattery::isChargingEnabled()   { return !_setupcomplete ? false : _chargingenabled; }
 bool   PBattery::isCharging()          { return !_setupcomplete ? false : (_chargingenabled && _chargeavailable); }
 bool   PBattery::enableCharging() { 
@@ -555,7 +555,7 @@ bool PorchLightSystem::getNewBatteryReadings() {
     Serial.print(F("  |  CEnabl:= ")); Serial.println(battery.isCharging() ? "True" : "False");
   };
 
-  _batterysaver = DebugMode ? false : (!battery.foundMax() || battery.getVoltage() < EnableBatterySaverAtVoltage);
+  _batterysaver = DebugMode ? false : (!battery.foundMax() || battery.getVoltage() < BatterySaverVolts);
 
   return gotnewreadings;
 }

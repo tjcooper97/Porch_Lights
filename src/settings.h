@@ -1,14 +1,17 @@
-#define DebugMode                   false
-#define EEPROMDaysToPrint           30
+#define DebugMode         false // Turning this on will enable debug serial printing
+#define EEPROMDaysToPrint 30    // This report can be requested via the serial monitor by passing any charter during a window of time when booting
 
-#define EnableBatterySaverAtVoltage 3.35
+#define BatterySaverVolts 3.35  // Below this voltage, the system will do everything it can to conserve power & lighting will be fully disabled
 
-#define MinimumChargeTemperature    34
-#define MaximumChargeTemperature    110
-#define MaximumHeatingTemperature   40
-#define TempToMaintain              28
-#define MinimumLightTemperature     30
+#define TEMP_MIN_CHARGE   34    // Minimum temperature charging is allowed at
+#define TEMP_MAX_CHARGE   110   // Maximum temperature charging is allowed at
+#define TEMP_MAX_HEAT     40    // Maximum temperature that the battery heater is able to be enabled
+#define TEMP_MAINTAIN     28    // Minimum temperature the system will attempt to maintain when there is enough charge to do so
+#define TEMP_MIN_OPERATE  30    // Minimum temperature lighting is allowed at
 
-#define LEDStripMaxBrightness       80
-#define LEDStripFadeDelay           15
-#define LightPercentConsideredDark  5
+#define MAXBRIGHTNESS     80    // Maximum brightness the led strip can be
+#define LEDFADEDELAY      15    // Speed at which the leds will fade between different events
+#define DARKTRIGGER       5     // Light % at or which below it is considered dark (this gives more precision over led turn on time vs just time based)
+
+#define TEMP_RANGE_UPPER  55    // 
+#define TEMP_RANGE_LOWER  45    // 
