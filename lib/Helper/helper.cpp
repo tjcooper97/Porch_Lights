@@ -678,6 +678,7 @@ bool PorchLightSystem::updateLEDColor() {
   uint8_t pi; for (uint8_t ci = 0 ; ci < 3; ci++) { for (pi = 0; pi < 4; pi++) { _hcolor[ci][pi] = 0; }; };
     
   if      (_holiday == HOLIDAY_NEWYEAR)      { _hcolor[0][2] = 255;                                           _hcolor[1][0] = 222; _hcolor[1][1] = 193; _hcolor[1][2] = 4; }
+  else if (_holiday == HOLIDAY_MLK)          { _hcolor[0][0] = 146; _hcolor[0][1] = 3;   _hcolor[0][2] = 255; _hcolor[1][0] = 222; _hcolor[1][1] = 193; _hcolor[1][2] = 4; }
   else if (_holiday == HOLIDAY_VALENTINE)    { _hcolor[0][0] = 255;                                           _hcolor[1][3] = 255; }
   else if (_holiday == HOLIDAY_TAXDAY)       { _hcolor[0][1] = 255; }
   else if (_holiday == HOLIDAY_EARTHDAY)     { _hcolor[0][2] = 255;                                           _hcolor[1][1] = 255; }
@@ -690,6 +691,7 @@ bool PorchLightSystem::updateLEDColor() {
         || _holiday == HOLIDAY_COLOMBUS
         || _holiday == HOLIDAY_VETERANS)     { _hcolor[0][0] = 255;                                           _hcolor[1][3] = 255;                                         _hcolor[2][2] = 255; }
   else if (_holiday == HOLIDAY_HALLOWEEN)    { _hcolor[0][0] = 146; _hcolor[0][1] = 3;   _hcolor[0][2] = 255; _hcolor[1][0] = 247; _hcolor[1][1] = 125; _hcolor[1][2] = 2; }
+  else if (_holiday == HOLIDAY_USMC)         { _hcolor[0][0] = 255;                                           _hcolor[1][0] = 222; _hcolor[1][1] = 193; _hcolor[1][2] = 4; }
   else if (_holiday == HOLIDAY_THANKSGIVING) { _hcolor[0][0] = 247; _hcolor[0][1] = 125; _hcolor[0][2] = 2; }
   else if (_holiday == HOLIDAY_CHRISTMAS)    { _hcolor[0][0] = 255;                                           _hcolor[1][1] = 255; }
   else                                       { _hcolor[0][3] = 255; };
