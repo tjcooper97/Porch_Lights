@@ -561,6 +561,33 @@ bool PorchLightSystem::getNewBatteryReadings() {
 }
 
 
+bool PorchLightSystem::_recalcHoliday() {
+  _holiday = HOLIDAY_NONE;
+
+  if ((now.getMon() == DECEMBER &&  now.getDay() == 31) || (now.getMon() == JANUARY && now.getDay() == 1)) { _holiday = HOLIDAY_NEWYEAR; return true; };
+  if  (now.getMon() == FEBRUARY &&  now.getDay() == 14)                        { _holiday = HOLIDAY_VALENTINE; return true; };
+  if  (now.getMon() == APRIL    &&  now.getDay() == 15)                        { _holiday = HOLIDAY_TAXDAY;    return true; };
+  if  (now.getMon() == APRIL    &&  now.getDay() == 22)                        { _holiday = HOLIDAY_EARTHDAY;  return true; };
+  if  (now.getMon() == JUNE     &&  now.getDay() == 22)                        { _holiday = HOLIDAY_BDAY;      return true; };
+  if  (now.getMon() == JULY     &&  now.getDay() == 4)                         { _holiday = HOLIDAY_JULY4TH;   return true; };
+  if  (now.getMon() == OCTOBER  &&  now.getDay() == 31)                        { _holiday = HOLIDAY_HALLOWEEN; return true; };
+  if  (now.getMon() == DECEMBER && (now.getDay() == 24 || now.getDay() == 25)) { _holiday = HOLIDAY_CHRISTMAS; return true; };
+
+  // TG day can be as early as the 22nd or as late as the 28th
+  // To allow for TG lighting Wednesday-Friday we check days between 21-29
+  // But to be extra safe about edge cases, we double check each day
+  if (now.getMon() == NOVEMBER && (now.getDay() > 20 && now.getDay() < 30)) {
+    uint8_t dow = now.getDayOfWeek();
+    if ((dow == WEDNESDAY && now.getDay() < 28)
+     || (dow == THURSDAY  && now.getDay() > 21 && now.getDay() < 29)
+     || (dow == FRIDAY    && now.getDay() > 22)) 
+    { _holiday = HOLIDAY_THANKSGIVING; return true; };
+  };
+
+  return true;
+}
+
+
 bool PorchLightSystem::getNewTimeData() {
   if (!_foundrtc) { return false; };
 
@@ -570,25 +597,11 @@ bool PorchLightSystem::getNewTimeData() {
 
   if (_now.getTimeOfDay() != now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DebugMode && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
-  if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) {
-    _holiday = HOLIDAY_NONE;
-    if     ((now.getMon() == 12 &&  now.getDay() == 31) || (now.getMon() == 1 && now.getDay() == 1)) { _holiday = HOLIDAY_NEWYEAR; }
-    else if (now.getMon() == 2  &&  now.getDay() == 14)                                              { _holiday = HOLIDAY_VALENTINE; }
-    else if (now.getMon() == 4  &&  now.getDay() == 15)                                              { _holiday = HOLIDAY_TAXDAY; }
-    else if (now.getMon() == 4  &&  now.getDay() == 22)                                              { _holiday = HOLIDAY_EARTHDAY; }
-    else if (now.getMon() == 6  &&  now.getDay() == 22)                                              { _holiday = HOLIDAY_BDAY; }
-    else if (now.getMon() == 7  &&  now.getDay() == 4)                                               { _holiday = HOLIDAY_JULY4TH; }
-    else if (now.getMon() == 10 &&  now.getDay() == 31)                                              { _holiday = HOLIDAY_HALLOWEEN; }
-    else if (now.getMon() == 11 &&  now.getDay() >= 22  && now.getDay() <= 28)                       { _holiday = HOLIDAY_THANKSGIVING; }
-    else if (now.getMon() == 12 && (now.getDay() == 24  || now.getDay() == 25))                      { _holiday = HOLIDAY_CHRISTMAS; };
-    updateLEDColor();
-  };
+  if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); updateLEDColor(); };
 
-  
   if      (now.getHour() == 0)                                                                                               { _morningdatastored = false; _eveningdatastored = false; }
   else if (!_morningdatastored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) { _morningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2))); }
   else if (!_eveningdatastored && now.getTimeOfDay() == TOD_AFTERNOON && now.getSunsetMinutes()-40  < now.getTotalMinutes()) { _eveningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE); };
-  
 
   if (DebugMode) { 
     serialPrintDateTime();
