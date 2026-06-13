@@ -419,7 +419,7 @@ bool PorchLightSystem::begin() {
   if (_setupcomplete) { return true; };
   wdt_reset();
 
-  if (DebugMode) { 
+  if (DEBUGMODE) { 
     Serial.begin(115200);
     Serial.println(F("Coopers Porch Lights"));
     Serial.print(F("Setting up Threads... ")); 
@@ -437,30 +437,30 @@ bool PorchLightSystem::begin() {
     thrd[t_system].setTrigType(tt_BOOLR);
     thrd[t_led].setTrigType(tt_BOOLR);
     
-    thrd[t_battery].setInterval(DebugMode ? 30000 : 600000);
-    thrd[t_sensors].setInterval(DebugMode ? 15000 : 60000);
-    thrd[t_time].setInterval(DebugMode ? 20000 : 300000);
-  if (DebugMode) { Serial.println(F("Complete!")); };
+    thrd[t_battery].setInterval(DEBUGMODE ? 30000 : 600000);
+    thrd[t_sensors].setInterval(DEBUGMODE ? 15000 : 60000);
+    thrd[t_time].setInterval(DEBUGMODE ? 20000 : 300000);
+  if (DEBUGMODE) { Serial.println(F("Complete!")); };
 
 
-  if (DebugMode) { Serial.print(F("Setting up LED Strip... ")); };
+  if (DEBUGMODE) { Serial.print(F("Setting up LED Strip... ")); };
     wdt_reset();
-    if (!ledstrip.begin()) { if (DebugMode) { Serial.println(F("Error!")); }; }
-    else                   { if (DebugMode) { Serial.println(F("Complete!")); }; };
+    if (!ledstrip.begin()) { if (DEBUGMODE) { Serial.println(F("Error!")); }; }
+    else                   { if (DEBUGMODE) { Serial.println(F("Complete!")); }; };
   
 
-  if (DebugMode) { Serial.print(F("Searching for DS3231... ")); };
+  if (DEBUGMODE) { Serial.print(F("Searching for DS3231... ")); };
     wdt_reset();
     _foundrtc = _rtc.begin();
-    if (!_foundrtc) { if (DebugMode) { Serial.println(F("Not Found!")); }; }
+    if (!_foundrtc) { if (DEBUGMODE) { Serial.println(F("Not Found!")); }; }
     else { 
       now = _rtc.getNow();
       if (now.isDST()) { now.addTime(1,0,0); };
       if (now.getYear() < 2026) { 
         _foundrtc = false; 
-        if (DebugMode) { Serial.println(F("DS3231 was found, but has lost power & the time has not been reset, so considered not found")); };
+        if (DEBUGMODE) { Serial.println(F("DS3231 was found, but has lost power & the time has not been reset, so considered not found")); };
       }
-      else if (DebugMode) { 
+      else if (DEBUGMODE) { 
         Serial.println(F("Found!"));
         Serial.print(F("  >Date:= ")); Serial.print(now.getDayStr() + ", "); Serial.print(now.getMonStr() + " "); Serial.print(now.getDay()); Serial.print(", "); Serial.println(now.getYear());
         Serial.print(F("  >Time:= ")); Serial.println(now.getTime());
@@ -468,12 +468,12 @@ bool PorchLightSystem::begin() {
     };
   
 
-  if (DebugMode) { Serial.print(F("Setting up Battery... ")); };
+  if (DEBUGMODE) { Serial.print(F("Setting up Battery... ")); };
     wdt_reset();
-    if (!battery.begin()) { if (DebugMode) { Serial.println(F("Error!")); }; }
+    if (!battery.begin()) { if (DEBUGMODE) { Serial.println(F("Error!")); }; }
     else { 
       battery.getNewReadings();
-      if (DebugMode) { 
+      if (DEBUGMODE) { 
         Serial.println(F("Complete!"));
         Serial.print(F("  >Found MAX   := ")); Serial.println(battery.foundMax() ? "True" : "False");
         Serial.print(F("  >Average Temp:= ")); Serial.print(battery.getTemperature()); Serial.println(F("* F"));
@@ -483,7 +483,7 @@ bool PorchLightSystem::begin() {
     };
 
 
-  if (DebugMode) { serialPrintDateTime(); Serial.println(F("Setup Complete!")); };
+  if (DEBUGMODE) { serialPrintDateTime(); Serial.println(F("Setup Complete!")); };
   _setupcomplete = true;
   return true;
 }
@@ -507,10 +507,10 @@ bool PorchLightSystem::sleep(period_t period) { return sleep(period,1); }
 bool PorchLightSystem::sleep(period_t period, uint8_t multiplier) {
   wdt_reset();
 
-  multiplier = DebugMode || multiplier < 1 ? 1 : multiplier > 8 ? 8 : multiplier;
+  multiplier = DEBUGMODE || multiplier < 1 ? 1 : multiplier > 8 ? 8 : multiplier;
   uint32_t sleepmillis = period_t_millis(period) * uint32_t(multiplier);
 
-  if (DebugMode) { 
+  if (DEBUGMODE) { 
     serialPrintDateTime(); 
     Serial.print(F("Sleeping for ")); Serial.print((double(sleepmillis)/1000)); Serial.println(F(" seconds"));
     Serial.flush();
@@ -534,7 +534,7 @@ bool PorchLightSystem::getNewSensorReadings() {
   _ambientlight/=3;
   _ambientlight = _ambientlight > 100 ? 100 : _ambientlight;
   
-  if (DebugMode) { 
+  if (DEBUGMODE) { 
     serialPrintDateTime();
     Serial.print(F("Sensor  Data  |  Light:= ")); Serial.print(String(_ambientlight) + "%");
     Serial.println();
@@ -547,7 +547,7 @@ bool PorchLightSystem::getNewSensorReadings() {
 bool PorchLightSystem::getNewBatteryReadings() {
   bool gotnewreadings = battery.getNewReadings();
   
-  if (DebugMode) { 
+  if (DEBUGMODE) { 
     serialPrintDateTime();
     Serial.print(F("Battery Data  |  Temp:= ")); Serial.print(battery.getTemperature()); Serial.print("* F");
     Serial.print(F("  |  Volt:= ")); Serial.print(battery.getVoltage());     Serial.print("v"); 
@@ -555,7 +555,7 @@ bool PorchLightSystem::getNewBatteryReadings() {
     Serial.print(F("  |  CEnabl:= ")); Serial.println(battery.isCharging() ? "True" : "False");
   };
 
-  _batterysaver = DebugMode ? false : (!battery.foundMax() || battery.getVoltage() < BatterySaverVolts);
+  _batterysaver = DEBUGMODE ? false : (!battery.foundMax() || battery.getVoltage() < BATTERYSAVERVOLTS);
 
   return gotnewreadings;
 }
@@ -619,7 +619,7 @@ bool PorchLightSystem::getNewTimeData() {
   now = _rtc.getNow();
   if (now.isDST()) { now.addTime(1,0,0); };
 
-  if (_now.getTimeOfDay() != now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DebugMode && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
+  if (_now.getTimeOfDay() != now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
   if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); updateLEDColor(); };
 
@@ -627,7 +627,7 @@ bool PorchLightSystem::getNewTimeData() {
   else if (!_morningdatastored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) { _morningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2))); }
   else if (!_eveningdatastored && now.getTimeOfDay() == TOD_AFTERNOON && now.getSunsetMinutes()-40  < now.getTotalMinutes()) { _eveningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE); };
 
-  if (DebugMode) { 
+  if (DEBUGMODE) { 
     serialPrintDateTime();
     Serial.print(F("Time    Data  |  TimeOfDay:= ")); Serial.print(now.getTimeOfDayStr());
     Serial.print(F("  |  Current Holiday:= ")); Serial.print(_holiday);
@@ -656,7 +656,7 @@ bool    PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
 
 
 bool PorchLightSystem::serialPrintDateTime() {
-  if (!DebugMode || !_foundrtc) { return false; };
+  if (!DEBUGMODE || !_foundrtc) { return false; };
   _now = _rtc.getNow();
   if (_now.isDST()) { _now.addTime(1,0,0); };
   Serial.print(_now.getDate() + " - " + _now.getTime() + "  |  ");
@@ -665,7 +665,7 @@ bool PorchLightSystem::serialPrintDateTime() {
 
 
 bool PorchLightSystem::setThreadPriority(uint8_t threadpriority) { 
-  if (DebugMode) { serialPrintDateTime(); Serial.print(F("Changed thread priority to:= ")); Serial.println(threadpriority); };
+  if (DEBUGMODE) { serialPrintDateTime(); Serial.print(F("Changed thread priority to:= ")); Serial.println(threadpriority); };
   TThread_Priority = threadpriority;
   return true;
 }
