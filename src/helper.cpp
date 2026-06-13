@@ -564,31 +564,36 @@ bool PorchLightSystem::getNewBatteryReadings() {
 bool PorchLightSystem::_recalcHoliday() {
   _holiday = HOLIDAY_NONE;
 
-  if (now.getMon() == JANUARY   && now.getDay() == 1)                                  { _holiday = HOLIDAY_NEWYEAR;   return true; };
-  if (now.getMon() == FEBRUARY  && now.getDay() == 14)                                 { _holiday = HOLIDAY_VALENTINE; return true; };
-  if (now.getMon() == APRIL     && now.getDay() == 15)                                 { _holiday = HOLIDAY_TAXDAY;    return true; };
-  if (now.getMon() == APRIL     && now.getDay() == 22)                                 { _holiday = HOLIDAY_EARTHDAY;  return true; };
-  if (now.getMon() == MAY       && now.getDay() >  24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL;  return true; };
-  if (now.getMon() == JUNE      && now.getDay() == 22)                                 { _holiday = HOLIDAY_BDAY;      return true; };
-  if (now.getMon() == JULY      && now.getDay() == 4)                                  { _holiday = HOLIDAY_JULY4TH;   return true; };
-  if (now.getMon() == SEPTEMBER && now.getDay() <  8  && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR;     return true; };
-  if (now.getMon() == OCTOBER   && now.getDay() == 31)                                 { _holiday = HOLIDAY_HALLOWEEN; return true; };
+  if (now.getMon() == JANUARY)  { if (now.getDay() == 1) { _holiday = HOLIDAY_NEWYEAR; }; return true; };
+  if (now.getMon() == FEBRUARY) {
+    if      (now.getDay() == 14) { _holiday = HOLIDAY_VALENTINE; }
+    else if (now.getDay() == 17) { _holiday = HOLIDAY_PRESIDENTS; };
+    return true;
+  };
+  if (now.getMon() == APRIL) { 
+    if      (now.getDay() == 15) { _holiday = HOLIDAY_TAXDAY; }
+    else if (now.getDay() == 22) { _holiday = HOLIDAY_EARTHDAY; };
+    return true;
+  };
+  if (now.getMon() == MAY)       { if (now.getDay() >  24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL; };  return true; };
+  if (now.getMon() == JUNE)      { if (now.getDay() == 22)                                 { _holiday = HOLIDAY_BDAY; };      return true; };
+  if (now.getMon() == JULY)      { if (now.getDay() == 4)                                  { _holiday = HOLIDAY_JULY4TH; };   return true; };
+  if (now.getMon() == SEPTEMBER) { if (now.getDay() <  8  && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR; };     return true; };
+  if (now.getMon() == OCTOBER)   { if (now.getDay() == 31)                                 { _holiday = HOLIDAY_HALLOWEEN; }; return true; };
+  if (now.getMon() == NOVEMBER)  {
+    if (now.getDay() > 20 && now.getDay() < 30) {
+      if ((now.getDayOfWeek() == WEDNESDAY && now.getDay() < 28)
+       || (now.getDayOfWeek() == THURSDAY  && now.getDay() > 21 && now.getDay() < 29)
+       || (now.getDayOfWeek() == FRIDAY    && now.getDay() > 22)) 
+      { _holiday = HOLIDAY_THANKSGIVING; };
+    };
+    return true;
+  };
   if (now.getMon() == DECEMBER) {
     if (now.getDay() == 24 || now.getDay() == 25) { _holiday = HOLIDAY_CHRISTMAS; return true; };
-    if (now.getDay() == 31)                       { _holiday = HOLIDAY_NEWYEAR;   return true; };
+    if (now.getDay() == 31)                       { _holiday = HOLIDAY_NEWYEAR; };
   };
-
-  // TG day can be as early as the 22nd or as late as the 28th
-  // To allow for TG lighting Wednesday-Friday we check days between 21-29
-  // But to be extra safe about edge cases, we double check each day
-  if (now.getMon() == NOVEMBER && (now.getDay() > 20 && now.getDay() < 30)) {
-    uint8_t dow = now.getDayOfWeek();
-    if ((dow == WEDNESDAY && now.getDay() < 28)
-     || (dow == THURSDAY  && now.getDay() > 21 && now.getDay() < 29)
-     || (dow == FRIDAY    && now.getDay() > 22)) 
-    { _holiday = HOLIDAY_THANKSGIVING; return true; };
-  };
-
+  
   return true;
 }
 
