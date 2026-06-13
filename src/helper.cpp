@@ -565,13 +565,15 @@ bool PorchLightSystem::_recalcHoliday() {
   _holiday = HOLIDAY_NONE;
 
   if ((now.getMon() == DECEMBER &&  now.getDay() == 31) || (now.getMon() == JANUARY && now.getDay() == 1)) { _holiday = HOLIDAY_NEWYEAR; return true; };
-  if  (now.getMon() == FEBRUARY &&  now.getDay() == 14)                        { _holiday = HOLIDAY_VALENTINE; return true; };
-  if  (now.getMon() == APRIL    &&  now.getDay() == 15)                        { _holiday = HOLIDAY_TAXDAY;    return true; };
-  if  (now.getMon() == APRIL    &&  now.getDay() == 22)                        { _holiday = HOLIDAY_EARTHDAY;  return true; };
-  if  (now.getMon() == JUNE     &&  now.getDay() == 22)                        { _holiday = HOLIDAY_BDAY;      return true; };
-  if  (now.getMon() == JULY     &&  now.getDay() == 4)                         { _holiday = HOLIDAY_JULY4TH;   return true; };
-  if  (now.getMon() == OCTOBER  &&  now.getDay() == 31)                        { _holiday = HOLIDAY_HALLOWEEN; return true; };
-  if  (now.getMon() == DECEMBER && (now.getDay() == 24 || now.getDay() == 25)) { _holiday = HOLIDAY_CHRISTMAS; return true; };
+  if  (now.getMon() == FEBRUARY &&  now.getDay() == 14)                          { _holiday = HOLIDAY_VALENTINE; return true; };
+  if  (now.getMon() == APRIL    &&  now.getDay() == 15)                          { _holiday = HOLIDAY_TAXDAY;    return true; };
+  if  (now.getMon() == APRIL    &&  now.getDay() == 22)                          { _holiday = HOLIDAY_EARTHDAY;  return true; };
+  if  (now.getMon() == MAY && now.getDay() > 24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL;  return true; };
+  if  (now.getMon() == JUNE     &&  now.getDay() == 22)                          { _holiday = HOLIDAY_BDAY;      return true; };
+  if  (now.getMon() == JULY     &&  now.getDay() == 4)                           { _holiday = HOLIDAY_JULY4TH;   return true; };
+  if  (now.getMon() == OCTOBER  &&  now.getDay() == 31)                          { _holiday = HOLIDAY_HALLOWEEN; return true; };
+  if  (now.getMon() == DECEMBER && (now.getDay() == 24 || now.getDay() == 25))   { _holiday = HOLIDAY_CHRISTMAS; return true; };
+
 
   // TG day can be as early as the 22nd or as late as the 28th
   // To allow for TG lighting Wednesday-Friday we check days between 21-29
