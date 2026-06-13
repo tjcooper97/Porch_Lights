@@ -582,14 +582,19 @@ bool PorchLightSystem::_recalcHoliday() {
   if (now.getMon() == MAY)       { if (now.getDay() >  24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL; }; return true; };
   if (now.getMon() == JUNE)      { if (now.getDay() == 22)                                 { _holiday = HOLIDAY_BDAY; };     return true; };
   if (now.getMon() == JULY)      { if (now.getDay() == 4)                                  { _holiday = HOLIDAY_JULY4TH; };  return true; };
-  if (now.getMon() == SEPTEMBER) { if (now.getDay() <  8  && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR; };    return true; };
-  if (now.getMon() == OCTOBER)   { 
-    if      (now.getDay() == 31) { _holiday = HOLIDAY_HALLOWEEN; }
-    else if (now.getDay() > 7 && now.getDay() < 15 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_COLOMBUS; };
+  if (now.getMon() == SEPTEMBER) { 
+    if      (now.getDay() < 8 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR; }
+    else if (now.getDay() == 11)                               { _holiday = HOLIDAY_911; };
+    return true;
+  };
+  if (now.getMon() == OCTOBER) { 
+    if      (now.getDay() > 7 && now.getDay() < 15 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_COLOMBUS; }
+    else if (now.getDay() == 31) { _holiday = HOLIDAY_HALLOWEEN; };
     return true;
   };
   if (now.getMon() == NOVEMBER)  {
-    if (now.getDay() > 20 && now.getDay() < 30) {
+    if (now.getDay() == 11) { _holiday = HOLIDAY_VETERANS; }
+    else if (now.getDay() > 20 && now.getDay() < 30) {
       if ((now.getDayOfWeek() == WEDNESDAY && now.getDay() < 28)
        || (now.getDayOfWeek() == THURSDAY  && now.getDay() > 21 && now.getDay() < 29)
        || (now.getDayOfWeek() == FRIDAY    && now.getDay() > 22)) 

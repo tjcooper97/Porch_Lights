@@ -41,10 +41,12 @@
     #define HOLIDAY_BDAY         8
     #define HOLIDAY_JULY4TH      9
     #define HOLIDAY_LABOR        10
-    #define HOLIDAY_COLOMBUS     11
-    #define HOLIDAY_HALLOWEEN    12
-    #define HOLIDAY_THANKSGIVING 13
-    #define HOLIDAY_CHRISTMAS    14
+    #define HOLIDAY_911          11
+    #define HOLIDAY_COLOMBUS     12
+    #define HOLIDAY_HALLOWEEN    13
+    #define HOLIDAY_VETERANS     14
+    #define HOLIDAY_THANKSGIVING 15
+    #define HOLIDAY_CHRISTMAS    16
 
   // Input/Output Pins
     #define PIN_OLITE    A0 // Ambient light sensor
