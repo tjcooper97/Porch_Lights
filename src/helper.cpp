@@ -592,8 +592,9 @@ bool PorchLightSystem::_recalcHoliday() {
     else if (now.getDay() == 31) { _holiday = HOLIDAY_HALLOWEEN; };
     return true;
   };
-  if (now.getMon() == NOVEMBER)  {
-    if (now.getDay() == 11) { _holiday = HOLIDAY_VETERANS; }
+  if (now.getMon() == NOVEMBER)  { 
+    if      (now.getDay() == 10) { _holiday = HOLIDAY_USMC; }
+    else if (now.getDay() == 11) { _holiday = HOLIDAY_VETERANS; }
     else if (now.getDay() > 20 && now.getDay() < 30) {
       if ((now.getDayOfWeek() == WEDNESDAY && now.getDay() < 28)
        || (now.getDayOfWeek() == THURSDAY  && now.getDay() > 21 && now.getDay() < 29)
@@ -681,7 +682,13 @@ bool PorchLightSystem::updateLEDColor() {
   else if (_holiday == HOLIDAY_TAXDAY)       { _hcolor[0][1] = 255; }
   else if (_holiday == HOLIDAY_EARTHDAY)     { _hcolor[0][2] = 255;                                           _hcolor[1][1] = 255; }
   else if (_holiday == HOLIDAY_BDAY)         { _hcolor[0][0] = 146; _hcolor[0][1] = 3;   _hcolor[0][2] = 255; }
-  else if (_holiday == HOLIDAY_JULY4TH)      { _hcolor[0][0] = 255;                                           _hcolor[1][3] = 255;                                         _hcolor[2][2] = 255; }
+  else if (_holiday == HOLIDAY_PRESIDENTS
+        || _holiday == HOLIDAY_MEMORIAL
+        || _holiday == HOLIDAY_JULY4TH
+        || _holiday == HOLIDAY_LABOR
+        || _holiday == HOLIDAY_911
+        || _holiday == HOLIDAY_COLOMBUS
+        || _holiday == HOLIDAY_VETERANS)     { _hcolor[0][0] = 255;                                           _hcolor[1][3] = 255;                                         _hcolor[2][2] = 255; }
   else if (_holiday == HOLIDAY_HALLOWEEN)    { _hcolor[0][0] = 146; _hcolor[0][1] = 3;   _hcolor[0][2] = 255; _hcolor[1][0] = 247; _hcolor[1][1] = 125; _hcolor[1][2] = 2; }
   else if (_holiday == HOLIDAY_THANKSGIVING) { _hcolor[0][0] = 247; _hcolor[0][1] = 125; _hcolor[0][2] = 2; }
   else if (_holiday == HOLIDAY_CHRISTMAS)    { _hcolor[0][0] = 255;                                           _hcolor[1][1] = 255; }

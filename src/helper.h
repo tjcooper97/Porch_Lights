@@ -32,7 +32,7 @@
     #define HOLIDAY_NOTSETUP     255
     #define HOLIDAY_NONE         0
     #define HOLIDAY_NEWYEAR      1
-    #define HOLIDAY_MLK          2
+    #define HOLIDAY_MLK          2  // No colors yet
     #define HOLIDAY_VALENTINE    3
     #define HOLIDAY_PRESIDENTS   4
     #define HOLIDAY_TAXDAY       5
@@ -44,9 +44,10 @@
     #define HOLIDAY_911          11
     #define HOLIDAY_COLOMBUS     12
     #define HOLIDAY_HALLOWEEN    13
-    #define HOLIDAY_VETERANS     14
-    #define HOLIDAY_THANKSGIVING 15
-    #define HOLIDAY_CHRISTMAS    16
+    #define HOLIDAY_USMC         14 // No colors yet
+    #define HOLIDAY_VETERANS     15
+    #define HOLIDAY_THANKSGIVING 16
+    #define HOLIDAY_CHRISTMAS    17
 
   // Input/Output Pins
     #define PIN_OLITE    A0 // Ambient light sensor
