@@ -26,15 +26,20 @@ void setup() {
   if (sys.begin()) {
     if (EEPROM.read(0) != 17) { for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,17); };
 
-    if (!DEBUGMODE) { sys.ledstrip.demo(); }
-    else if (sys.getFoundRTC()) {
-      Serial.println(F("Type anything to print a battery history report from EEPROM"));
-      uint32_t stime = millis();
-      while ((millis() - stime) < 7000) { if (Serial.available()) { print_EPPROM(EEPROMREPORTDAYS); break; }; };
-    };
+    #if DEBUGMODE == false
+      sys.ledstrip.demo();
+    #else
+      if (sys.getFoundRTC()) {
+        Serial.println(F("Type anything to print a battery history report from EEPROM"));
+        uint32_t stime = millis();
+        while ((millis() - stime) < 7000) { if (Serial.available()) { print_EPPROM(EEPROMREPORTDAYS); break; }; };
+      };
+    #endif
   }
   else {
-    if (DEBUGMODE) { Serial.println(F("Failed system begin, pausing all tasks except battery management")); };
+    #if DEBUGMODE == true
+      Serial.println(F("Failed system begin, pausing all tasks except battery management"));
+    #endif
     for (uint8_t pt = 0; pt < thrd_count; pt++) { if (pt != t_battery) { sys.thrd[pt].setPaused(true); }; }; 
   };
 
@@ -104,7 +109,9 @@ void thread_Battery() {
 
   while (sys.battery.getTemperature() < TEMP_MAINTAIN && sys.battery.isHeatingAllowed()) {
     if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
-    if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(TEMP_MAINTAIN); Serial.println(F("* F")); };
+    #if DEBUGMODE == true
+      sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(TEMP_MAINTAIN); Serial.println(F("* F"));
+    #endif
     sys.sleep(SLEEP_8S,4);
     sys.getNewBatteryReadings();
   };
@@ -112,25 +119,53 @@ void thread_Battery() {
   if (sys.battery.isChargingAvailable()) {
     while (sys.battery.getTemperature() < TEMP_MIN_CHARGE && sys.battery.isHeatingAllowed()) {
       if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
-      if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(TEMP_MIN_CHARGE); Serial.println(F("* F")); };
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(TEMP_MIN_CHARGE); Serial.println(F("* F"));
+      #endif
       sys.sleep(SLEEP_8S,4);
       sys.getNewBatteryReadings();
     };
-    if (!sys.battery.isChargingEnabled() && sys.battery.isChargingAllowed()) { if (sys.battery.enableCharging() && DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("Charging enabled")); }; };
+    if (!sys.battery.isChargingEnabled() && sys.battery.isChargingAllowed()) { 
+      sys.battery.enableCharging();
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime();
+        if (sys.battery.isChargingEnabled()) { Serial.println(F("Charging enabled")); } else { Serial.println(F("Failed to enable charging")); };
+      #endif
+    };
   };
 
-  if (sys.battery.isChargingEnabled() && !sys.battery.isChargingAllowed()) { if (sys.battery.disableCharging() && DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("Charging disabled")); }; };
-  if (sys.battery.isHeating()) { sys.battery.disableHeater(); };
+  if (sys.battery.isChargingEnabled() && !sys.battery.isChargingAllowed()) { 
+    sys.battery.disableCharging();
+    #if DEBUGMODE == true
+      sys.serialPrintDateTime();
+      if (!sys.battery.isChargingEnabled()) { Serial.println(F("Charging disabled")); } else { Serial.println(F("Failed to disable charging")); };
+    #endif
+  };
+
+  if (sys.battery.isHeating()) { 
+    sys.battery.disableHeater();
+    #if DEBUGMODE == true
+      sys.serialPrintDateTime();
+      if (!sys.battery.isHeating()) { Serial.println(F("Heating disabled")); } else { Serial.println(F("Failed to disable heating")); };
+    #endif
+  };
 
   if (sys.inBatterySaverMode()) {
     if (sys.getThreadPriority() != tp_HIGH) {
-      if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("Entering battery saver mode")); };
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime(); Serial.println(F("Entering battery saver mode"));
+      #endif
       if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,LEDFADEDELAY); };
       sys.setThreadPriority(tp_HIGH);
     };
     sys.sleep(SLEEP_8S,8);
   }
-  else { if (sys.getThreadPriority() == tp_HIGH) { if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("Exiting battery saver mode")); }; sys.setThreadPriority(tp_MED); }; };
+  else if (sys.getThreadPriority() == tp_HIGH) {
+    sys.setThreadPriority(tp_MED);
+    #if DEBUGMODE == true
+      sys.serialPrintDateTime(); Serial.println(F("Exited battery saver mode"));
+    #endif
+  };
 }
 
 
@@ -149,11 +184,21 @@ void thread_System() {
   if (sys.battery.getTemperature() < TEMP_MIN_OPERATE || sys.battery.isChargingAvailable() || sys.thrd[t_led].getPaused()) { allowleds = false; };
 
   if (allowleds) {
-    if (sys.getThreadPriority() > tp_LOW) { sys.setThreadPriority(tp_LOW); if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("LEDs enabled")); }; };
+    if (sys.getThreadPriority() > tp_LOW) { 
+      sys.setThreadPriority(tp_LOW); 
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime(); Serial.println(F("LEDs enabled"));
+      #endif
+    };
   }
   else {
     if (sys.ledstrip.isLit()) { sys.ledstrip.setBrightness(0,LEDFADEDELAY); };
-    if (sys.getThreadPriority() < tp_MED) { sys.setThreadPriority(tp_MED); if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("LEDs disabled")); }; };
+    if (sys.getThreadPriority() < tp_MED) { 
+      sys.setThreadPriority(tp_MED); 
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime(); Serial.println(F("LEDs disabled"));
+      #endif
+    };
   };
   sys.thrd[t_led].setTriggered(allowleds);
 }
@@ -230,8 +275,20 @@ void thread_LED() {
   calcdbrightness = calcdbrightness < 20 ? 20 : calcdbrightness > mbrn ? mbrn : calcdbrightness;
   somethingchanged = somethingchanged || (sys.ledstrip.getBrightness() != calcdbrightness);
 
-  if (somethingchanged) { 
-    if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println("Updating (" + String(ledchanges) + ") LEDs  |  LEDs On: " + String(ledson) + "/" + String(LEDSTRIP_UCOUNT) + "  |  Brightness: " + String(calcdbrightness) + "%"); };
-    if (!sys.ledstrip.setBrightness(calcdbrightness, LEDFADEDELAY)) { sys.thrd[t_led].setPaused(true); if (DEBUGMODE) { sys.serialPrintDateTime(); Serial.println(F("LED thread paused due to error during update")); }; }; 
+  if (somethingchanged) {
+    #if DEBUGMODE == true
+      sys.serialPrintDateTime();
+        Serial.print(F("Updating ("));           Serial.print(String(ledchanges)); 
+        Serial.print(F(") LEDs  |  LEDs On: ")); Serial.print(String(ledson)); 
+        Serial.print("/");                       Serial.print(String(LEDSTRIP_UCOUNT));
+        Serial.print(F("  |  Brightness: "));    Serial.print(String(calcdbrightness));
+        Serial.println("%");
+    #endif
+    if (!sys.ledstrip.setBrightness(calcdbrightness, LEDFADEDELAY)) { 
+      sys.thrd[t_led].setPaused(true);
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime(); Serial.println(F("LED thread paused due to error during update"));
+      #endif
+    };
   };
 }
