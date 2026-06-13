@@ -250,8 +250,8 @@ PLEDStrip::PLEDStrip() {
   cp++; pled[cp].stripindex = SP_STAIR_9;  pled[cp].section = SP_STAIR;
   cp++; pled[cp].stripindex = SP_STAIR_10; pled[cp].section = SP_STAIR;
 
-  cp++; pled[cp].stripindex = SP_STAIR_A1; pled[cp].section = SP_STAIRA;
-  cp++; pled[cp].stripindex = SP_STAIR_A2; pled[cp].section = SP_STAIRA;
+  cp++; pled[cp].stripindex = SP_STAIRA_1; pled[cp].section = SP_STAIRA;
+  cp++; pled[cp].stripindex = SP_STAIRA_2; pled[cp].section = SP_STAIRA;
   
   cp++; pled[cp].stripindex = SP_RITER_1; pled[cp].section = SP_RITER;
   cp++; pled[cp].stripindex = SP_RITER_2; pled[cp].section = SP_RITER;

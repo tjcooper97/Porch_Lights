@@ -182,7 +182,7 @@ void thread_LED() {
 
     if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || lsi == SP_STAIR_7  || lsi == SP_STAIR_10) { shouldallow = true; }
     else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairpattern; }
-    else if (lsi == SP_STAIR_A2)                       { shouldallow = altstairpattern; }
+    else if (lsi == SP_STAIRA_2)                       { shouldallow = altstairpattern; }
     else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = latenight ? false : bv >= 4.00; }
     else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = latenight ? false : bv >= 3.85; }
     else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = latenight ? false : bv >= 3.81; }
@@ -195,11 +195,11 @@ void thread_LED() {
     else if (lss == SP_FRONT3)                         { shouldallow = latenight ? false : bv >= 3.61; }
     else if (lss == SP_FRONT2)                         { shouldallow = latenight ? false : bv >= 3.58; }
     else if (lss == SP_RITER)                          { shouldallow = bv >= 3.54; }
-    else if (lss == SP_STAIR || lsi == SP_STAIR_A1)    { 
+    else if (lss == SP_STAIR || lsi == SP_STAIRA_1)    { 
       if (bv < 3.45) { shouldallow = false; }
       else {
         if      (lsi == SP_STAIR_1 || lsi == SP_STAIR_4) { shouldallow = true; }
-        else if (lsi == SP_STAIR_A1)                     { shouldallow = altstairpattern; }
+        else if (lsi == SP_STAIRA_1)                     { shouldallow = altstairpattern; }
         else                                             { shouldallow = !altstairpattern; };
       };
     };
