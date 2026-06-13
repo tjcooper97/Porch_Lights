@@ -564,10 +564,14 @@ bool PorchLightSystem::getNewBatteryReadings() {
 bool PorchLightSystem::_recalcHoliday() {
   _holiday = HOLIDAY_NONE;
 
-  if (now.getMon() == JANUARY)  { if (now.getDay() == 1) { _holiday = HOLIDAY_NEWYEAR; }; return true; };
+  if (now.getMon() == JANUARY) {
+    if      (now.getDay() == 1) { _holiday = HOLIDAY_NEWYEAR; }
+    else if (now.getDay() > 14 && now.getDay() < 22 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MLK; };
+    return true;
+  };
   if (now.getMon() == FEBRUARY) {
     if      (now.getDay() == 14) { _holiday = HOLIDAY_VALENTINE; }
-    else if (now.getDay() == 17) { _holiday = HOLIDAY_PRESIDENTS; };
+    else if (now.getDay() > 14 && now.getDay() < 22 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_PRESIDENTS; };
     return true;
   };
   if (now.getMon() == APRIL) { 
@@ -575,11 +579,15 @@ bool PorchLightSystem::_recalcHoliday() {
     else if (now.getDay() == 22) { _holiday = HOLIDAY_EARTHDAY; };
     return true;
   };
-  if (now.getMon() == MAY)       { if (now.getDay() >  24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL; };  return true; };
-  if (now.getMon() == JUNE)      { if (now.getDay() == 22)                                 { _holiday = HOLIDAY_BDAY; };      return true; };
-  if (now.getMon() == JULY)      { if (now.getDay() == 4)                                  { _holiday = HOLIDAY_JULY4TH; };   return true; };
-  if (now.getMon() == SEPTEMBER) { if (now.getDay() <  8  && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR; };     return true; };
-  if (now.getMon() == OCTOBER)   { if (now.getDay() == 31)                                 { _holiday = HOLIDAY_HALLOWEEN; }; return true; };
+  if (now.getMon() == MAY)       { if (now.getDay() >  24 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_MEMORIAL; }; return true; };
+  if (now.getMon() == JUNE)      { if (now.getDay() == 22)                                 { _holiday = HOLIDAY_BDAY; };     return true; };
+  if (now.getMon() == JULY)      { if (now.getDay() == 4)                                  { _holiday = HOLIDAY_JULY4TH; };  return true; };
+  if (now.getMon() == SEPTEMBER) { if (now.getDay() <  8  && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_LABOR; };    return true; };
+  if (now.getMon() == OCTOBER)   { 
+    if      (now.getDay() == 31) { _holiday = HOLIDAY_HALLOWEEN; }
+    else if (now.getDay() > 7 && now.getDay() < 15 && now.getDayOfWeek() == MONDAY) { _holiday = HOLIDAY_COLOMBUS; };
+    return true;
+  };
   if (now.getMon() == NOVEMBER)  {
     if (now.getDay() > 20 && now.getDay() < 30) {
       if ((now.getDayOfWeek() == WEDNESDAY && now.getDay() < 28)

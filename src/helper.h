@@ -32,16 +32,19 @@
     #define HOLIDAY_NOTSETUP     255
     #define HOLIDAY_NONE         0
     #define HOLIDAY_NEWYEAR      1
-    #define HOLIDAY_VALENTINE    2
-    #define HOLIDAY_TAXDAY       3
-    #define HOLIDAY_EARTHDAY     4
-    #define HOLIDAY_MEMORIAL     5
-    #define HOLIDAY_BDAY         6
-    #define HOLIDAY_JULY4TH      7
-    #define HOLIDAY_LABOR        8
-    #define HOLIDAY_HALLOWEEN    9
-    #define HOLIDAY_THANKSGIVING 10
-    #define HOLIDAY_CHRISTMAS    11
+    #define HOLIDAY_MLK          2
+    #define HOLIDAY_VALENTINE    3
+    #define HOLIDAY_PRESIDENTS   4
+    #define HOLIDAY_TAXDAY       5
+    #define HOLIDAY_EARTHDAY     6
+    #define HOLIDAY_MEMORIAL     7
+    #define HOLIDAY_BDAY         8
+    #define HOLIDAY_JULY4TH      9
+    #define HOLIDAY_LABOR        10
+    #define HOLIDAY_COLOMBUS     11
+    #define HOLIDAY_HALLOWEEN    12
+    #define HOLIDAY_THANKSGIVING 13
+    #define HOLIDAY_CHRISTMAS    14
 
   // Input/Output Pins
     #define PIN_OLITE    A0 // Ambient light sensor
