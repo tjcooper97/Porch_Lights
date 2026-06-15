@@ -27,7 +27,9 @@ void setup() {
     if (EEPROM.read(0) != 17) { for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,17); };
 
     #if DEBUGMODE == false
-      sys.ledstrip.demo();
+      wdt_disable();
+        sys.ledstrip.demo(350);
+      wdt_enable(WDTLen);
     #else
       if (sys.getFoundRTC()) {
         Serial.println(F("Type anything to print a battery history report from EEPROM"));

@@ -136,7 +136,7 @@
       PLEDStrip();
       bool reset();
       bool begin();
-      bool demo();
+      bool demo(uint16_t delayval);
 
       bool setColor(uint8_t color[3][4]);
           

@@ -283,13 +283,20 @@ bool PLEDStrip::begin() {
 
 
 
-bool PLEDStrip::demo() {
+bool PLEDStrip::demo(uint16_t delayval) {
   if (!_setupcomplete) { return false; };
 
+  for (uint8_t pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
+    if (pi > 0) { _strip.setPixelColor(pled[pi-1].stripindex, _strip.Color(0,0,0,0)); };
+    _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,255));
+    _strip.show();
+    delay(delayval);
+  };
+  _strip.setPixelColor(pled[(LEDSTRIP_UCOUNT-1)].stripindex, _strip.Color(0,0,0,0));
+  _strip.show();
 
   return true;
 }
-
 
 
 
