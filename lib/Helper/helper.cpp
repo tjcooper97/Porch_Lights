@@ -455,7 +455,7 @@ bool PorchLightSystem::begin() {
 
   wdt_reset();
   #if DEBUGMODE == true
-    Serial.println(F("Setting up LED Strip... "));
+    Serial.print(F("Setting up LED Strip... "));
     if (ledstrip.begin()) { Serial.println(F("Complete!")); } 
     else                  { Serial.println(F("Error!")); };
   #else
@@ -464,7 +464,7 @@ bool PorchLightSystem::begin() {
   
 
   #if DEBUGMODE == true
-    Serial.println(F("Searching for DS3231... "));
+    Serial.print(F("Searching for DS3231... "));
   #endif
     wdt_reset();
     if (_rtc.begin()) {
@@ -474,7 +474,7 @@ bool PorchLightSystem::begin() {
       if (now.getYear() < 2026) { 
         _foundrtc = false; 
         #if DEBUGMODE == true
-          Serial.println(F("DS3231 was found, but has lost power & the time has not been reset, so considered not found"));
+          Serial.println(F("Found but has lost power & the time has not been reset, so considered not found!"));
         #endif
       }
       else {
@@ -494,7 +494,7 @@ bool PorchLightSystem::begin() {
   
 
   #if DEBUGMODE == true
-    Serial.println(F("Setting up Battery... "));
+    Serial.print(F("Setting up Battery... "));
   #endif
     wdt_reset();
     if (battery.begin()) { 
