@@ -173,13 +173,14 @@ void thread_Battery() {
 
 
 
-void thread_System() { 
-  bool allowleds = false;
-
+bool allowleds = false;
+void thread_System() {
   if (sys.getFoundRTC()) { 
     TimeOfDay tod = sys.now.getTimeOfDay();
-    if      (tod == TOD_NIGHT || tod == TOD_MIDNIGHT || tod == TOD_MORNNIGHT)                 { allowleds = true; }
-    else if (tod == TOD_DAWN  || tod == TOD_SUNRISE  || tod == TOD_SUNSET || tod == TOD_DUSK) { allowleds = (sys.getAmbientLight() <= DARKTRIGGER); };
+    if      (tod == TOD_NIGHT || tod == TOD_MIDNIGHT || tod == TOD_MORNNIGHT) { allowleds = true; }
+    else if (tod == TOD_DAWN  || tod == TOD_SUNRISE)                          { allowleds = allowleds && (sys.getAmbientLight() <= DARKTRIGGER); }
+    else if (tod == TOD_DUSK  || tod == TOD_SUNSET)                           { allowleds = allowleds || (sys.getAmbientLight() <= DARKTRIGGER); }
+    else                                                                      { allowleds = false; };
   }
   else { allowleds = (sys.getAmbientLight() <= DARKTRIGGER); };
 
