@@ -208,27 +208,30 @@ void thread_System() {
 
 
 
+// These two vars are only for thread_LED(), so as to allow for state change tracking
+uint8_t prevholiday   = HOLIDAY_NOTSETUP;
+bool    prevlatenight = false;
 
 void thread_LED() {
-  bool somethingchanged = false;
-  double bv = sys.battery.foundMax() ? sys.battery.getVoltage() : 0;
+  double bv         = sys.battery.foundMax() ? sys.battery.getVoltage() : 0;
+  bool   altstairs  = (sys.isLateNight() || bv < 3.71);
 
-  if (sys.getFoundRTC()) { if (sys.now.getHour() == 0 && sys.now.getMin() <= 10) { somethingchanged = true; }; }; // Just in case we switched to a day that now is a holiday but otherwise had no other reason to update i guess
+  bool haschanged = ((prevholiday != sys.getCurrentHoliday()) || (prevlatenight != sys.isLateNight()));
+    prevholiday   = sys.getCurrentHoliday();
+    prevlatenight = sys.isLateNight();
 
   uint16_t lsi = 0;
   uint8_t  lss = 0;
   bool     shouldallow = false;
-  bool     altstairpattern = (sys.isLateNight() || bv < 3.71);
-  uint8_t  ledchanges  = 0;
-  uint8_t  ledson      = 0;
+  uint8_t  ledchanges = 0, ledson = 0;
   for (uint8_t pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
     lsi = sys.ledstrip.getLEDStripIndex(pi);
     lss = sys.ledstrip.getLEDSection(pi);
     shouldallow = false;
 
     if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || lsi == SP_STAIR_7  || lsi == SP_STAIR_10) { shouldallow = true; }
-    else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairpattern; }
-    else if (lsi == SP_STAIRA_2)                       { shouldallow = altstairpattern; }
+    else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairs; }
+    else if (lsi == SP_STAIRA_2)                       { shouldallow = altstairs; }
     else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = sys.isLateNight() ? false : bv >= 4.00; }
     else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.85; }
     else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.81; }
@@ -245,12 +248,12 @@ void thread_LED() {
       if (bv < 3.45) { shouldallow = false; }
       else {
         if      (lsi == SP_STAIR_1 || lsi == SP_STAIR_4) { shouldallow = true; }
-        else if (lsi == SP_STAIRA_1)                     { shouldallow = altstairpattern; }
-        else                                             { shouldallow = !altstairpattern; };
+        else if (lsi == SP_STAIRA_1)                     { shouldallow = altstairs; }
+        else                                             { shouldallow = !altstairs; };
       };
     };
 
-    if (sys.ledstrip.getLEDIsAllowed(pi) != shouldallow) { ledchanges++; somethingchanged = true; sys.ledstrip.setLEDIsAllowed(pi, shouldallow); };
+    if (sys.ledstrip.getLEDIsAllowed(pi) != shouldallow) { ledchanges++; haschanged = true; sys.ledstrip.setLEDIsAllowed(pi, shouldallow); };
     ledson+=shouldallow;
   };
   
@@ -274,9 +277,9 @@ void thread_LED() {
   if (sys.isLateNight()) { calcdbrightness/=2; };
 
   calcdbrightness = calcdbrightness < 20 ? 20 : calcdbrightness > mbrn ? mbrn : calcdbrightness;
-  somethingchanged = somethingchanged || (sys.ledstrip.getBrightness() != calcdbrightness);
+  haschanged = haschanged || (sys.ledstrip.getBrightness() != calcdbrightness);
 
-  if (somethingchanged) {
+  if (haschanged) {
     #if DEBUGMODE == true
       sys.serialPrintDateTime();
         Serial.print(F("Updating ("));           Serial.print(String(ledchanges)); 

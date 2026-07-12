@@ -660,7 +660,7 @@ bool PorchLightSystem::getNewTimeData() {
   if      (_latenight)        { _latenight = (now.getHour() >= 23 && now.getHour() <= 3); } // max latenight mode time window
   else if (now.getHour() < 3) { _latenight = true; }; // standard latenight mode if no other triggers
 
-  if (_now.getTimeOfDay() != now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
+  if (now.getTimeOfDay() != _now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
   if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); updateLEDColor(); };
 
