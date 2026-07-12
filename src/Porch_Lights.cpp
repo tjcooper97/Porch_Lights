@@ -217,8 +217,10 @@ void thread_LED() {
   bool   altstairs  = (sys.isLateNight() || bv < 3.71);
 
   bool haschanged = ((prevholiday != sys.getCurrentHoliday()) || (prevlatenight != sys.isLateNight()));
+  if (haschanged) {
     prevholiday   = sys.getCurrentHoliday();
     prevlatenight = sys.isLateNight();
+  };
 
   uint16_t lsi = 0;
   uint8_t  lss = 0;
