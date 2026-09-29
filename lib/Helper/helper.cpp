@@ -328,7 +328,15 @@ bool    PLEDStrip::updatePixels()                    { return setBrightness(_bri
 bool    PLEDStrip::setBrightness(uint8_t brightness) { return setBrightness(brightness,0); }
 bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
   if (!_setupcomplete || brightness > 100 || fadedelay > 50) { return false; };
-  if (_brightness == brightness) { fadedelay = 0; };
+
+  // This intentionally disregards holiday lighting color changes as a willchange trigger, fadedelay is only desired for on/off state changes
+  bool willchange = (_brightness != brightness);
+  if (!willchange) {
+    for (uint8_t cled = 0; cled < LEDSTRIP_UCOUNT; cled++) { 
+      if (pled[cled].isallowed != pled[cled].islit) { willchange = true; break; };
+    };
+  };
+  if (!willchange) { fadedelay = 0; };
 
   bool increasing = (_brightness <= brightness);
 
