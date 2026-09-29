@@ -540,7 +540,7 @@ bool PorchLightSystem::sleep(period_t period) { return sleep(period,1); }
 bool PorchLightSystem::sleep(period_t period, uint8_t multiplier) {
   wdt_reset();
 
-  multiplier = (DEBUGMODE || multiplier < 1) ? 1 : (multiplier > 8) ? 8 : multiplier;
+  multiplier = (DEBUGMODE || multiplier < 1 || (_foundrtc && now.getHour() == 0 && now.getMin() <= 10)) ? 1 : (multiplier > 8) ? 8 : multiplier;
   uint32_t sleepmillis = period_t_millis(period) * uint32_t(multiplier);
 
   #if DEBUGMODE == true
