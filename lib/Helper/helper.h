@@ -120,6 +120,7 @@
   
   struct PLEDPixelStruct {
     bool     isallowed;
+    bool     islit;
     uint16_t stripindex;
     uint8_t  section;
   };
@@ -151,10 +152,11 @@
 
       bool     getLEDIsAllowed(uint8_t led);
       bool     setLEDIsAllowed(uint8_t led, bool isallowed);
+      bool     getLEDIsLit(uint8_t led);
       uint16_t getLEDStripIndex(uint8_t led);
       uint8_t  getLEDSection(uint8_t led);
   };
-  
+
 
 
 

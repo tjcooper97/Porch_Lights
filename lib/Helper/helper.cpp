@@ -269,7 +269,8 @@ bool PLEDStrip::reset() {
 
   _brightness = 0;
 
-  for (uint8_t cpled = 0; cpled < LEDSTRIP_UCOUNT; cpled++) { pled[cpled].isallowed = false; };
+  for (uint8_t cpled = 0; cpled < LEDSTRIP_UCOUNT; cpled++) { pled[cpled].isallowed = false; pled[cpled].islit = false; };
+  if (_setupcomplete) { setBrightness(0,0); };
 
   return true;
 }
@@ -348,6 +349,10 @@ bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
     _strip.show();
     delay(fadedelay);
   };
+
+  bool stripislit = (brightness > 0);
+  for (pi = 0; pi < LEDSTRIP_UCOUNT; pi++) { pled[pi].islit = (pled[pi].isallowed && stripislit); };
+
   wdt_disable();
   wdt_enable(WDTO_8S);
 
@@ -360,6 +365,7 @@ bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
 
 bool     PLEDStrip::getLEDIsAllowed(uint8_t led)                 { if (led >= LEDSTRIP_UCOUNT || !_setupcomplete) { return false; }; return pled[led].isallowed; }
 bool     PLEDStrip::setLEDIsAllowed(uint8_t led, bool isallowed) { if (led >= LEDSTRIP_UCOUNT || !_setupcomplete) { return false; }; pled[led].isallowed = isallowed; return true; }
+bool     PLEDStrip::getLEDIsLit(uint8_t led)                     { if (led >= LEDSTRIP_UCOUNT || !_setupcomplete) { return false; }; return pled[led].islit; }
 uint16_t PLEDStrip::getLEDStripIndex(uint8_t led)                { if (led >= LEDSTRIP_UCOUNT || !_setupcomplete) { return 0; }; return pled[led].stripindex; };
 uint8_t  PLEDStrip::getLEDSection(uint8_t led)                   { if (led >= LEDSTRIP_UCOUNT || !_setupcomplete) { return 0; }; return pled[led].section; };
 
