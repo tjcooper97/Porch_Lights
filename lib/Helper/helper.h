@@ -21,6 +21,9 @@
     #define t_battery  0
     #define t_sensors  1
     #define t_time     2
+      #define t_time_interval_debug   20000
+      #define t_time_interval_normal 300000
+      #define t_time_interval_quick   10000
     #define t_system   3
     #define t_led      4
     #define thrd_count 5  

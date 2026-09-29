@@ -447,7 +447,7 @@ bool PorchLightSystem::begin() {
     
     thrd[t_battery].setInterval(DEBUGMODE ? 30000 : 600000);
     thrd[t_sensors].setInterval(DEBUGMODE ? 15000 : 60000);
-    thrd[t_time].setInterval(DEBUGMODE ? 20000 : 300000);
+    thrd[t_time].setInterval(DEBUGMODE ? t_time_interval_debug : t_time_interval_normal);
   #if DEBUGMODE == true
     Serial.println(F("Complete!"));
   #endif
@@ -540,7 +540,7 @@ bool PorchLightSystem::sleep(period_t period) { return sleep(period,1); }
 bool PorchLightSystem::sleep(period_t period, uint8_t multiplier) {
   wdt_reset();
 
-  multiplier = (DEBUGMODE || multiplier < 1 || (_foundrtc && now.getHour() == 0 && now.getMin() <= 10)) ? 1 : (multiplier > 8) ? 8 : multiplier;
+  multiplier = (DEBUGMODE || multiplier < 1 || (_foundrtc && now.getHour() == 23 && now.getMin() > 55)) ? 1 : (multiplier > 8) ? 8 : multiplier;
   uint32_t sleepmillis = period_t_millis(period) * uint32_t(multiplier);
 
   #if DEBUGMODE == true
@@ -657,12 +657,19 @@ bool PorchLightSystem::getNewTimeData() {
   now = _rtc.getNow();
   if (now.isDST()) { now.addTime(1,0,0); };
 
+  // This speeds up the time thread when near midnight so latenight mode & holiday lighting happens more accurately
+  if (now.getHour() == 23 && now.getMin() > 50) { thrd[t_time].setInterval(t_time_interval_quick); };
+
   if      (_latenight)        { _latenight = (now.getHour() >= 23 || now.getHour() <= 3); } // max latenight mode time window
   else if (now.getHour() < 3) { _latenight = true; }; // standard latenight mode if no other triggers
 
   if (now.getTimeOfDay() != _now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
-  if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); updateLEDColor(); };
+  if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { 
+    thrd[t_time].setInterval(DEBUGMODE ? t_time_interval_debug : t_time_interval_normal); // reset interval here to avoid dst weirdness
+    _recalcHoliday();
+    updateLEDColor();
+  };
 
   if      (now.getHour() == 0)                                                                                               { _morningdatastored = false; _eveningdatastored = false; }
   else if (!_morningdatastored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) { _morningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2))); }
