@@ -123,6 +123,7 @@
     bool     islit;
     uint16_t stripindex;
     uint8_t  section;
+    uint8_t  color[4];
   };
 
   class PLEDStrip {

@@ -269,7 +269,11 @@ bool PLEDStrip::reset() {
 
   _brightness = 0;
 
-  for (uint8_t cpled = 0; cpled < LEDSTRIP_UCOUNT; cpled++) { pled[cpled].isallowed = false; pled[cpled].islit = false; };
+  for (uint8_t cpled = 0; cpled < LEDSTRIP_UCOUNT; cpled++) { 
+    pled[cpled].isallowed = false;
+    pled[cpled].islit = false;
+    pled[cpled].color[0] = 0; pled[cpled].color[1] = 0; pled[cpled].color[2] = 0;
+  };
   if (_setupcomplete) { setBrightness(0,0); };
 
   return true;
@@ -328,43 +332,57 @@ bool    PLEDStrip::updatePixels()                    { return setBrightness(_bri
 bool    PLEDStrip::setBrightness(uint8_t brightness) { return setBrightness(brightness,0); }
 bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
   if (!_setupcomplete || brightness > 100 || fadedelay > 50) { return false; };
-
-  // This intentionally disregards holiday lighting color changes as a willchange trigger, fadedelay is only desired for on/off state changes
-  bool willchange = (_brightness != brightness);
-  if (!willchange) {
-    for (uint8_t cled = 0; cled < LEDSTRIP_UCOUNT; cled++) { 
-      if (pled[cled].isallowed != pled[cled].islit) { willchange = true; break; };
-    };
-  };
-  if (!willchange) { fadedelay = 0; };
-
-  bool increasing = (_brightness <= brightness);
-
-  uint8_t ci, pi, tcolor[3][4];
+  
   wdt_disable();
   wdt_enable(WDTO_8S);
-  for (int16_t bl = int16_t(_brightness); (increasing ? bl <= int16_t(brightness) : bl >= int16_t(brightness)); bl = (increasing ? bl+1 : bl-1)) {
-    for (ci = 0; ci < _colorcount; ci++) { for (pi = 0; pi < 4; pi++) { tcolor[ci][pi] = uint8_t((int16_t(_color[ci][pi]) * bl)/100); }; };
 
-    ci = 0;
-    for (pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
-      if (ci >= _colorcount) { ci = 0; };
-      if      (!pled[pi].isallowed)           { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,0)); }
-      else if (pled[pi].section == SP_STAIR
-            || pled[pi].section == SP_STAIRA) { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(0,0,0,uint8_t((255*bl)/100))); }
-      else                                    { _strip.setPixelColor(pled[pi].stripindex, _strip.Color(tcolor[ci][0],tcolor[ci][1],tcolor[ci][2],tcolor[ci][3])); ci++; };
+  uint8_t ci, pi, si; // color, pixel, and special index (used in for loops below)
+  uint8_t tcolor[4], fcolor[3][4]; // tcolor (temporary color) is what were setting a pixel to while looping, fcolor (final color) is the final colors for the strip
+  for (ci = 0; ci < _colorcount; ci++) { 
+    for (pi = 0; pi < 4; pi++) {
+      fcolor[ci][pi] = uint8_t(double(_color[ci][pi]) * (double(brightness)/100));
     };
+  };
+  double fwlevel = uint8_t(255 * (double(brightness)/100)); // final white level for the stairs
+  double cperc[2]; // 0:=normal percentage through for loop, 1:=reverse percentage
+
+  for (double cp = (fadedelay == 0 ? 100 : 1); cp < 101; cp++) { // cp is a double to reduce conversions in the loop (this is our working percentage)
+    cperc[0] = cp/100;
+    cperc[1] = ((100-cp)/100);
+    ci = 0;
+
+    for (pi = 0; pi < LEDSTRIP_UCOUNT; pi++) {
+      if (!pled[pi].isallowed) {
+        if (!pled[pi].islit) { continue; }; // requested off & already off, skip
+        // fade down from current color to 0,0,0,0
+        for (si = 0; si < 4; si++) { tcolor[si] = uint8_t(double(pled[pi].color[si]) * cperc[1]); };
+      }
+      else if (pled[pi].section == SP_STAIR || pled[pi].section == SP_STAIRA) { // fading stairs (always white)
+        for (si = 0; si < 3; si++) { tcolor[si] = 0; };
+        tcolor[3] = uint8_t(double(pled[pi].color[3]) + ((fwlevel - double(pled[pi].color[3])) * cperc[0]));
+      }
+      else { // fade from current color to fcolor[ci][x]
+        // this math is wrong
+        for (si = 0; si < 4; si++) { tcolor[si] = uint8_t(double(pled[pi].color[si]) + ((double(fcolor[ci][si]) - double(pled[pi].color[si])) * cperc[0])); };
+        ci++;
+        if (ci >= _colorcount) { ci = 0; };
+      };
+
+      _strip.setPixelColor(pled[pi].stripindex, _strip.Color(tcolor[0], tcolor[1], tcolor[2], tcolor[3]));
+      if (cp == 100) { pled[pi].color[0] = tcolor[0]; pled[pi].color[1] = tcolor[1]; pled[pi].color[2] = tcolor[2]; pled[pi].color[3] = tcolor[3]; };
+    };
+
     _strip.show();
-    delay(fadedelay);
+    if (fadedelay > 0) { delay(fadedelay); };
   };
 
-  bool stripislit = (brightness > 0);
+  wdt_disable();
+  wdt_enable(WDTO_8S);
+
+  _brightness = brightness;
+  bool stripislit = (_brightness > 0);
   for (pi = 0; pi < LEDSTRIP_UCOUNT; pi++) { pled[pi].islit = (pled[pi].isallowed && stripislit); };
 
-  wdt_disable();
-  wdt_enable(WDTO_8S);
-
-  _brightness = uint8_t(brightness);
   return true;
 }
 
@@ -483,8 +501,15 @@ bool PorchLightSystem::begin() {
     wdt_reset();
     if (_rtc.begin()) {
       _foundrtc = true;
+
+      // Uncomment to set time
+      // TTime temptime; 
+      // temptime.setDate(2026,9,30);
+      // temptime.setTime(18,20,30);
+      // _rtc.set(temptime);
+
       now = _rtc.getNow();
-      if (now.isDST()) { now.addTime(1,0,0); };
+      if (now.isDST()) { now.addTime(1,0,0,true); };
       if (now.getYear() < 2026) { 
         _foundrtc = false; 
         #if DEBUGMODE == true
@@ -669,7 +694,7 @@ bool PorchLightSystem::getNewTimeData() {
   if (!_foundrtc) { return false; };
   _now = now;
   now = _rtc.getNow();
-  if (now.isDST()) { now.addTime(1,0,0); };
+  if (now.isDST()) { now.addTime(1,0,0,true); };
 
   // This speeds up the time thread when near midnight so latenight mode & holiday lighting happens more accurately
   if (now.getHour() == 23 && now.getMin() > 50) { thrd[t_time].setInterval(t_time_interval_quick); };
@@ -721,7 +746,7 @@ bool    PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
   bool PorchLightSystem::serialPrintDateTime() {
     if (!_foundrtc) { return false; };
     _now = _rtc.getNow();
-    if (_now.isDST()) { _now.addTime(1,0,0); };
+    if (_now.isDST()) { _now.addTime(1,0,0,true); };
     Serial.print(_now.getDate() + " - " + _now.getTime() + "  |  ");
     return true;
   }
