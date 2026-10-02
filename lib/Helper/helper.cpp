@@ -434,7 +434,7 @@ PorchLightSystem::PorchLightSystem() {
   for (uint8_t cp = A5; cp <= A15; cp++) { pinMode(cp, INPUT_PULLUP); };
   for (uint8_t cp = 22; cp <= 49; cp++) { pinMode(cp, INPUT_PULLUP); };
 
-  _batterysaver = false;
+  _lowbattery = false;
 
   _foundrtc  = false;
   _holiday   = HOLIDAY_NOTSETUP;
@@ -628,9 +628,9 @@ bool PorchLightSystem::getNewBatteryReadings() {
   #endif
 
   #if DEBUGMODE == true
-    _batterysaver = false;
+    _lowbattery = false;
   #else
-    _batterysaver = (!battery.foundMax() || battery.getVoltage() < BATTERYSAVERVOLTS);
+    _lowbattery = (!battery.foundMax() || battery.getVoltage() < BATTERYSAVERVOLTS);
   #endif
 
   return gotnewreadings;
@@ -739,7 +739,7 @@ bool PorchLightSystem::_storeBatteryDataToEEPROM(uint16_t sadr) {
 
 
 uint8_t PorchLightSystem::getAmbientLight() { return _setupcomplete ? _ambientlight : 0; }
-bool    PorchLightSystem::inBatterySaverMode()     { return _batterysaver; }
+bool    PorchLightSystem::lowBattery()     { return _lowbattery; }
 
 
 #if DEBUGMODE == true

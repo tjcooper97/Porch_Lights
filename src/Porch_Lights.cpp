@@ -152,7 +152,7 @@ void thread_Battery() {
     #endif
   };
 
-  if (sys.inBatterySaverMode()) {
+  if (sys.lowBattery()) {
     if (sys.getThreadPriority() != tp_HIGH) {
       #if DEBUGMODE == true
         sys.serialPrintDateTime(); Serial.println(F("Entering battery saver mode"));

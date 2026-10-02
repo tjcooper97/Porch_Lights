@@ -169,7 +169,7 @@
     private:
     // Current statuses
       bool _setupcomplete;
-      bool _batterysaver;
+      bool _lowbattery;
     
     // Colors
       uint8_t  _dcolor[3][4]; // Default
@@ -206,7 +206,7 @@
       bool getNewTimeData();
 
       uint8_t getAmbientLight();
-      bool    inBatterySaverMode();
+      bool    lowBattery();
 
       #if DEBUGMODE == true
         bool serialPrintDateTime();
