@@ -206,7 +206,7 @@
       bool getNewTimeData();
 
       uint8_t getAmbientLight();
-      bool    lowBattery();
+      bool    hasLowBattery();
 
       #if DEBUGMODE == true
         bool serialPrintDateTime();

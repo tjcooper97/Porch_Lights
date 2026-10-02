@@ -739,7 +739,7 @@ bool PorchLightSystem::_storeBatteryDataToEEPROM(uint16_t sadr) {
 
 
 uint8_t PorchLightSystem::getAmbientLight() { return _setupcomplete ? _ambientlight : 0; }
-bool    PorchLightSystem::lowBattery()     { return _lowbattery; }
+bool    PorchLightSystem::hasLowBattery()   { return _lowbattery; }
 
 
 #if DEBUGMODE == true
