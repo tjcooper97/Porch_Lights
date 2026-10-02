@@ -31,7 +31,7 @@ void setup() {
         sys.ledstrip.demo(350);
       wdt_enable(WDTLen);
     #else
-      if (sys.getFoundRTC()) {
+      if (sys.foundRTC()) {
         Serial.println(F("Type anything to print a battery history report from EEPROM"));
         uint32_t stime = millis();
         while ((millis() - stime) < 7000) { if (Serial.available()) { print_EPPROM(EEPROMREPORTDAYS); break; }; };
@@ -99,7 +99,7 @@ void print_EPPROM(uint16_t daystoprint) {
 
 
 
-void thread_Sensors() { sys.thrd[t_system].setTriggered(true); sys.getNewSensorReadings(); }
+void thread_Sensors() { sys.thrd[t_system].setTriggered(true); sys.getNewSensorData(); }
 void thread_Time()    { sys.thrd[t_system].setTriggered(true); sys.getNewTimeData(); }
 
 
@@ -107,7 +107,7 @@ void thread_Time()    { sys.thrd[t_system].setTriggered(true); sys.getNewTimeDat
 
 void thread_Battery() {
   sys.thrd[t_system].setTriggered(true);
-  sys.getNewBatteryReadings();
+  sys.getNewBatteryData();
 
   while (sys.battery.getTemperature() < TEMP_MAINTAIN && sys.battery.isHeatingAllowed()) {
     if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
@@ -115,7 +115,7 @@ void thread_Battery() {
       sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(TEMP_MAINTAIN); Serial.println(F("* F"));
     #endif
     sys.sleep(SLEEP_8S,4);
-    sys.getNewBatteryReadings();
+    sys.getNewBatteryData();
   };
 
   if (sys.battery.isChargingAvailable()) {
@@ -125,7 +125,7 @@ void thread_Battery() {
         sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(TEMP_MIN_CHARGE); Serial.println(F("* F"));
       #endif
       sys.sleep(SLEEP_8S,4);
-      sys.getNewBatteryReadings();
+      sys.getNewBatteryData();
     };
     if (!sys.battery.isChargingEnabled() && sys.battery.isChargingAllowed()) { 
       sys.battery.enableCharging();
@@ -175,7 +175,7 @@ void thread_Battery() {
 
 bool allowleds = false;
 void thread_System() {
-  if (sys.getFoundRTC()) { 
+  if (sys.foundRTC()) { 
     TimeOfDay tod = sys.now.getTimeOfDay();
     if      (tod == TOD_NIGHT || tod == TOD_MIDNIGHT || tod == TOD_MORNNIGHT) { allowleds = true; }
     else if (tod == TOD_DAWN  || tod == TOD_SUNRISE)                          { allowleds = allowleds && (sys.getAmbientLight() <= DARKTRIGGER); }

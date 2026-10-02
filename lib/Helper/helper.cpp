@@ -600,7 +600,7 @@ bool PorchLightSystem::sleep(period_t period, uint8_t multiplier) {
 
 
 
-bool PorchLightSystem::getNewSensorReadings() {
+bool PorchLightSystem::getNewSensorData() {
   _ambientlight = 0;
   for (uint8_t nalr = 0; nalr < 3; nalr++) { _ambientlight += uint8_t(map(analogRead(PIN_OLITE),0,1024,100,0)); };
   _ambientlight/=3;
@@ -616,7 +616,7 @@ bool PorchLightSystem::getNewSensorReadings() {
 }
 
 
-bool PorchLightSystem::getNewBatteryReadings() {
+bool PorchLightSystem::getNewBatteryData() {
   bool gotnewreadings = battery.getNewReadings();
   
   #if DEBUGMODE == true
@@ -791,7 +791,7 @@ bool PorchLightSystem::updateLEDColor() {
 }
 
 
-bool    PorchLightSystem::getFoundRTC() const { return _foundrtc; }
+bool    PorchLightSystem::foundRTC() const    { return _foundrtc; }
 bool    PorchLightSystem::isLateNight() const { return _latenight; }
 uint8_t PorchLightSystem::getCurrentHoliday() { 
   if (!_setupcomplete) { return HOLIDAY_NONE; };

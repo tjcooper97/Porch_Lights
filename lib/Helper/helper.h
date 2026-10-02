@@ -201,8 +201,8 @@
       bool sleep(period_t period);
       bool sleep(period_t period, uint8_t multiplier);
 
-      bool getNewSensorReadings();
-      bool getNewBatteryReadings();
+      bool getNewSensorData();
+      bool getNewBatteryData();
       bool getNewTimeData();
 
       uint8_t getAmbientLight();
@@ -223,7 +223,7 @@
       bool updateLEDColor();
 
       TTime_Full now;
-      bool    getFoundRTC() const;
+      bool    foundRTC() const;
       bool    isLateNight() const;
       uint8_t getCurrentHoliday();
   };
