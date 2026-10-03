@@ -77,9 +77,16 @@
     
     // Battery info
       double _voltage;
+      double _percentage;
+
+    // Dynamic percentage adjustment (adjusted based on battery temperature)
+      double _minvolt;
+      double _midvolt;
+      double _4vpercent;
 
     // Temperature control
       double _temperature[2];
+      double _temprating; // 0 is TEMP_RANGE_LOWER, 1 is TEMP_RANGE_UPPER
       bool   _heateron;
 
     // Charge control
@@ -93,7 +100,7 @@
 
       bool foundMax();
 
-      bool getNewReadings();
+      bool getNewData();
 
       bool isHeatingAllowed();
       bool isHeating();
@@ -108,7 +115,10 @@
       bool   disableCharging();
 
       double getVoltage();
+      double getMinOpVoltage();
+      double getPercentage();
       double getTemperature();
+      double getTemperatureRating();
   };
   
 

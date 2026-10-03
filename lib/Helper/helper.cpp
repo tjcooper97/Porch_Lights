@@ -50,9 +50,15 @@ PBattery::PBattery() {
 
 bool PBattery::reset() {
   _voltage    = 0;
+  _percentage = 0;
+
+  _minvolt = MIN_OP_VOLT_COLD;
+  _midvolt = 3.7;
+  _4vpercent = 90;
   
   _temperature[0] = 0;
   _temperature[1] = 0;
+  _temprating     = 0;
   _heateron       = false;
   
   _chargeavailable = false;
@@ -70,6 +76,7 @@ bool PBattery::begin() {
   _foundmax = _max.begin();
 
   _setupcomplete = true;
+  getNewData();
   return true;
 };
 
@@ -79,7 +86,7 @@ bool PBattery::foundMax() { return _foundmax; }
 
 
 
-bool PBattery::getNewReadings() {
+bool PBattery::getNewData() {
   if (!_setupcomplete) { return false; };
   
   _chargeavailable = (digitalRead(PIN_PGOOD) == LOW);
@@ -93,17 +100,28 @@ bool PBattery::getNewReadings() {
 
   // Battery temp
   digitalWrite(PIN_BTEMP1H, HIGH); digitalWrite(PIN_BTEMP2H, HIGH); delay(50);
-  _ntc[0]->readFahrenheit(); _ntc[1]->readFahrenheit(); // Throw aways
-  
-  double tT = 3; double t0 = 0; double t1 = 0;
-  for (uint8_t i = 0; i < tT; i++) {
-    t0 += double(_ntc[0]->readFahrenheit());
-    t1 += double(_ntc[1]->readFahrenheit());
-    delay(5);
-  };
+    _ntc[0]->readFahrenheit(); _ntc[1]->readFahrenheit(); // Throw aways  
+    double tT = 3; double t0 = 0; double t1 = 0;
+    for (uint8_t i = 0; i < tT; i++) {
+      t0 += double(_ntc[0]->readFahrenheit());
+      t1 += double(_ntc[1]->readFahrenheit());
+      delay(5);
+    };
+  digitalWrite(PIN_BTEMP1H, LOW); digitalWrite(PIN_BTEMP2H, LOW);
 
   _temperature[0] = (t0/tT)-2; _temperature[1] = (t1/tT)-2;
-  digitalWrite(PIN_BTEMP1H, LOW); digitalWrite(PIN_BTEMP2H, LOW);
+  double avtemp = (_temperature[0] + _temperature[1]) / 2;
+
+  _temprating = avtemp >= TEMP_RANGE_UPPER ? 1 : avtemp <= TEMP_RANGE_LOWER ? 0 : (avtemp - TEMP_RANGE_LOWER) / (TEMP_RANGE_UPPER - TEMP_RANGE_LOWER);
+  _minvolt = MIN_OP_VOLT_COLD - ((MIN_OP_VOLT_COLD - MIN_OP_VOLT_WARM) * _temprating);
+  _midvolt = 3.8 - (.1 * _temprating);
+  _4vpercent = 85 + (5 * _temprating);
+
+  _percentage = _voltage >= 4.1      ? 100 :
+                _voltage <= _minvolt ? 0 :
+                _voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((_voltage-4) / .1))) :
+                _voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((_voltage-_midvolt) / (4-_midvolt)))) :
+                                       ((_voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
 
   return true;
 };
@@ -157,8 +175,11 @@ bool PBattery::disableCharging() {
 
 
 
-double PBattery::getVoltage()        { return (!_foundmax || !_setupcomplete) ? 0 : _voltage; }
-double PBattery::getTemperature()    { return !_setupcomplete ? 0 : (_temperature[0] + _temperature[1]) / 2; }
+double PBattery::getVoltage()           { return (!_foundmax || !_setupcomplete) ? 0                : _voltage; }
+double PBattery::getMinOpVoltage()      { return !_setupcomplete                 ? MIN_OP_VOLT_COLD : _minvolt; }
+double PBattery::getPercentage()        { return (!_foundmax || !_setupcomplete) ? 0                : _percentage; }
+double PBattery::getTemperature()       { return !_setupcomplete                 ? 0                : (_temperature[0] + _temperature[1]) / 2; }
+double PBattery::getTemperatureRating() { return !_setupcomplete                 ? 0                : _temprating; }
 
 
 
@@ -536,8 +557,7 @@ bool PorchLightSystem::begin() {
     Serial.print(F("Setting up Battery... "));
   #endif
     wdt_reset();
-    if (battery.begin()) { 
-      battery.getNewReadings();
+    if (battery.begin()) {
       #if DEBUGMODE == true
         Serial.println(F("Complete!"));
         Serial.print(F("  >Found MAX   := ")); Serial.println(battery.foundMax() ? "True" : "False");
@@ -617,7 +637,7 @@ bool PorchLightSystem::getNewSensorData() {
 
 
 bool PorchLightSystem::getNewBatteryData() {
-  bool gotnewreadings = battery.getNewReadings();
+  bool gotnewdata = battery.getNewData();
   
   #if DEBUGMODE == true
     serialPrintDateTime();
@@ -630,10 +650,10 @@ bool PorchLightSystem::getNewBatteryData() {
   #if DEBUGMODE == true
     _lowbattery = false;
   #else
-    _lowbattery = (!battery.foundMax() || battery.getVoltage() < BATTERYSAVERVOLTS);
+    _lowbattery = (!battery.foundMax() || battery.getVoltage() < battery.getMinOpVoltage());
   #endif
 
-  return gotnewreadings;
+  return gotnewdata;
 }
 
 
