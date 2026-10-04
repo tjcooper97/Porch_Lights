@@ -563,6 +563,7 @@ bool PorchLightSystem::begin() {
         Serial.print(F("  >Found MAX   := ")); Serial.println(battery.foundMax() ? "True" : "False");
         Serial.print(F("  >Average Temp:= ")); Serial.print(battery.getTemperature()); Serial.println(F("* F"));
         Serial.print(F("  >Voltage     := ")); Serial.print(battery.getVoltage()); Serial.println(F("v"));
+        Serial.print(F("  >Percentage  := ")); Serial.print(battery.getPercentage()); Serial.println(F("%"));
         Serial.print(F("  >Charge Avail:= ")); Serial.println(battery.isChargingAvailable() ? "True" : "False");
       #endif
     }
@@ -642,9 +643,10 @@ bool PorchLightSystem::getNewBatteryData() {
   #if DEBUGMODE == true
     serialPrintDateTime();
     Serial.print(F("Battery Data  |  Temp:= ")); Serial.print(battery.getTemperature()); Serial.print("* F");
-    Serial.print(F("  |  Volt:= ")); Serial.print(battery.getVoltage());     Serial.print("v"); 
-    Serial.print(F("  |  CAvail:= ")); Serial.print(battery.isChargingAvailable() ? "True" : "False");
-    Serial.print(F("  |  CEnabl:= ")); Serial.println(battery.isCharging() ? "True" : "False");
+    Serial.print(F("  |  Volt:= "));    Serial.print(battery.getVoltage());     Serial.print("v"); 
+    Serial.print(F("  |  Percent:= ")); Serial.print(battery.getPercentage());  Serial.print("%"); 
+    Serial.print(F("  |  CAvail:= "));  Serial.print(battery.isChargingAvailable() ? "True" : "False");
+    Serial.print(F("  |  CEnabl:= "));  Serial.println(battery.isCharging() ? "True" : "False");
   #endif
 
   #if DEBUGMODE == true
