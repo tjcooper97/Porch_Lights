@@ -3,7 +3,9 @@
   #define DEBUGMODE         false // Turning this on will enable debug serial printing
   #define EEPROMREPORTDAYS  30    // This report can be requested via the serial monitor by passing any charter during a window of time when booting
 
-  #define BATTERYSAVERVOLTS 3.35  // Below this voltage, the system will do everything it can to conserve power & lighting will be fully disabled
+  // Below the minimum operating voltage, the system will do everything it can to conserve power & lighting will be fully disabled
+  #define MIN_OP_VOLT_WARM  3.35  // minimum operating voltage when temperature are >= TEMP_RANGE_UPPER
+  #define MIN_OP_VOLT_COLD  3.45  // minimum operating voltage when temperature are <= TEMP_RANGE_LOWER
 
   #define TEMP_MAX_CHARGE   110   // Maximum temperature charging is allowed at
   #define TEMP_MIN_CHARGE   34    // Minimum temperature charging is allowed at
@@ -16,5 +18,5 @@
   #define DARKTRIGGER       5     // Light % at or which below it is considered dark (this gives more precision over led turn on time vs just time based)
 
   #define TEMP_RANGE_UPPER  55    // 
-  #define TEMP_RANGE_LOWER  45    // 
+  #define TEMP_RANGE_LOWER  35    // 
 #endif

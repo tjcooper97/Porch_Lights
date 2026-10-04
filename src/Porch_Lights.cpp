@@ -214,7 +214,8 @@ bool    prevlatenight = false;
 
 void thread_LED() {
   double bv         = sys.battery.foundMax() ? sys.battery.getVoltage() : 0;
-  bool   altstairs  = (sys.isLateNight() || bv < 3.71);
+  double bp         = sys.battery.foundMax() ? sys.battery.getPercentage() : 0;
+  bool   altstairs  = (sys.isLateNight() || bp <= 50);
 
   bool haschanged = ((prevholiday != sys.getCurrentHoliday()) || (prevlatenight != sys.isLateNight()));
   if (haschanged) {
@@ -234,20 +235,20 @@ void thread_LED() {
     if      (lsi == SP_LEFTF_1  || lsi == SP_LEFTF_3 || lsi == SP_STAIR_7  || lsi == SP_STAIR_10) { shouldallow = true; }
     else if (lsi == SP_STAIR_8  || lsi == SP_STAIR_9)  { shouldallow = !altstairs; }
     else if (lsi == SP_STAIRA_2)                       { shouldallow = altstairs; }
-    else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = sys.isLateNight() ? false : bv >= 4.00; }
-    else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.85; }
-    else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.81; }
-    else if (lsi == SP_FRONT_6  || lsi == SP_FRONT_8)  { shouldallow = sys.isLateNight() ? false : bv >= 3.78; }
-    else if (lsi == SP_FRONT_10 || lsi == SP_FRONT_12) { shouldallow = sys.isLateNight() ? false : bv >= 3.75; }
-    else if (lsi == SP_RITER_2  || lsi == SP_RITER_4)  { shouldallow = sys.isLateNight() ? false : bv >= 3.72; }
-    else if (lss == SP_LEFTF)                          { shouldallow = sys.isLateNight() ? false : bv >= 3.69; }
-    else if (lss == SP_LEFTR)                          { shouldallow = sys.isLateNight() ? false : bv >= 3.67; }
-    else if (lss == SP_FRONT1)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.64; }
-    else if (lss == SP_FRONT3)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.61; }
-    else if (lss == SP_FRONT2)                         { shouldallow = sys.isLateNight() ? false : bv >= 3.58; }
-    else if (lss == SP_RITER)                          { shouldallow = bv >= 3.54; }
+    else if (lsi >= SP_STAIR_5  && lsi <= SP_STAIR_6)  { shouldallow = sys.isLateNight() ? false : bp >= 90; }
+    else if (lsi == SP_LEFTR_2  || lsi == SP_LEFTR_4)  { shouldallow = sys.isLateNight() ? false : bp >= 70; }
+    else if (lsi == SP_FRONT_2  || lsi == SP_FRONT_4)  { shouldallow = sys.isLateNight() ? false : bp >= 65; }
+    else if (lsi == SP_FRONT_6  || lsi == SP_FRONT_8)  { shouldallow = sys.isLateNight() ? false : bp >= 61; }
+    else if (lsi == SP_FRONT_10 || lsi == SP_FRONT_12) { shouldallow = sys.isLateNight() ? false : bp >= 57; }
+    else if (lsi == SP_RITER_2  || lsi == SP_RITER_4)  { shouldallow = sys.isLateNight() ? false : bp >= 53; }
+    else if (lss == SP_LEFTF)                          { shouldallow = sys.isLateNight() ? false : bp >= 49; }
+    else if (lss == SP_LEFTR)                          { shouldallow = sys.isLateNight() ? false : bp >= 46; }
+    else if (lss == SP_FRONT1)                         { shouldallow = sys.isLateNight() ? false : bp >= 41; }
+    else if (lss == SP_FRONT3)                         { shouldallow = sys.isLateNight() ? false : bp >= 37; }
+    else if (lss == SP_FRONT2)                         { shouldallow = sys.isLateNight() ? false : bp >= 33; }
+    else if (lss == SP_RITER)                          { shouldallow = bp >= 27; }
     else if (lss == SP_STAIR || lsi == SP_STAIRA_1)    { 
-      if (bv < 3.45) { shouldallow = false; }
+      if (bp < 14) { shouldallow = false; }
       else {
         if      (lsi == SP_STAIR_1 || lsi == SP_STAIR_4) { shouldallow = true; }
         else if (lsi == SP_STAIRA_1)                     { shouldallow = altstairs; }
