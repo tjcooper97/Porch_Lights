@@ -263,13 +263,14 @@ void thread_LED() {
   uint8_t calcdbrightness;
   if (sys.isLateNight() || bp < 30) { calcdbrightness = 22; } 
   else {
-    if      (bp >= 90) { calcdbrightness = 80; } //00 & 03  - 75 & 80
-    else if (bp >= 80) { calcdbrightness = 70; } //92 & 97  - 65 & 70
-    else if (bp >= 70) { calcdbrightness = 60; } //85 & 91  - 60 & 65
-    else if (bp >= 60) { calcdbrightness = 55; } //77 & 86  - 55 & 60
-    else if (bp >= 50) { calcdbrightness = 50; } //70 & 80  - 50 & 60
-    else if (bp >= 40) { calcdbrightness = 40; } //63 & 73  - 40 & 50
-    else if (bp >= 30) { calcdbrightness = 30; } //56 & 66  - 35 & 45
+                                                 // warm & cold volt - og percent
+    if      (bp >= 90) { calcdbrightness = 80; } // 4.00 & 4.03      - 75 & 80
+    else if (bp >= 80) { calcdbrightness = 70; } // 3.92 & 3.97      - 65 & 70
+    else if (bp >= 70) { calcdbrightness = 60; } // 3.85 & 3.91      - 60 & 65
+    else if (bp >= 60) { calcdbrightness = 55; } // 3.77 & 3.86      - 55 & 60
+    else if (bp >= 50) { calcdbrightness = 50; } // 3.70 & 3.80      - 50 & 60
+    else if (bp >= 40) { calcdbrightness = 40; } // 3.63 & 3.73      - 40 & 50
+    else if (bp >= 30) { calcdbrightness = 30; } // 3.56 & 3.66      - 35 & 45
   };
 
   haschanged = haschanged || (sys.ledstrip.getBrightness() != calcdbrightness);
