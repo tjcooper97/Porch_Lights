@@ -91,37 +91,39 @@ bool PBattery::getNewData() {
   
   _chargeavailable = (digitalRead(PIN_PGOOD) == LOW);
 
-  if (_foundmax) { 
-    _max.wake(); 
-    delay(50); 
-    _voltage = double(_max.cellVoltage());
-    _max.hibernate(); 
-  };
-
   // Battery temp
-  digitalWrite(PIN_BTEMP1H, HIGH); digitalWrite(PIN_BTEMP2H, HIGH); delay(50);
-    _ntc[0]->readFahrenheit(); _ntc[1]->readFahrenheit(); // Throw aways  
-    double tT = 3; double t0 = 0; double t1 = 0;
-    for (uint8_t i = 0; i < tT; i++) {
-      t0 += double(_ntc[0]->readFahrenheit());
-      t1 += double(_ntc[1]->readFahrenheit());
-      delay(5);
-    };
-  digitalWrite(PIN_BTEMP1H, LOW); digitalWrite(PIN_BTEMP2H, LOW);
+    digitalWrite(PIN_BTEMP1H, HIGH); digitalWrite(PIN_BTEMP2H, HIGH); delay(50);
+      _ntc[0]->readFahrenheit(); _ntc[1]->readFahrenheit(); // Throw aways  
+      double tT = 3; double t0 = 0; double t1 = 0;
+      for (uint8_t i = 0; i < tT; i++) {
+        t0 += double(_ntc[0]->readFahrenheit());
+        t1 += double(_ntc[1]->readFahrenheit());
+        delay(5);
+      };
+    digitalWrite(PIN_BTEMP1H, LOW); digitalWrite(PIN_BTEMP2H, LOW);
 
-  _temperature[0] = (t0/tT)-2; _temperature[1] = (t1/tT)-2;
-  double avtemp = (_temperature[0] + _temperature[1]) / 2;
+    _temperature[0] = (t0/tT)-2; _temperature[1] = (t1/tT)-2;
+    double avtemp = (_temperature[0] + _temperature[1]) / 2;
+    _temprating = avtemp >= TEMP_RANGE_UPPER ? 1 : avtemp <= TEMP_RANGE_LOWER ? 0 : (avtemp - TEMP_RANGE_LOWER) / (TEMP_RANGE_UPPER - TEMP_RANGE_LOWER);
 
-  _temprating = avtemp >= TEMP_RANGE_UPPER ? 1 : avtemp <= TEMP_RANGE_LOWER ? 0 : (avtemp - TEMP_RANGE_LOWER) / (TEMP_RANGE_UPPER - TEMP_RANGE_LOWER);
-  _minvolt = MIN_OP_VOLT_COLD - ((MIN_OP_VOLT_COLD - MIN_OP_VOLT_WARM) * _temprating);
-  _midvolt = 3.8 - (.1 * _temprating);
-  _4vpercent = 85 + (5 * _temprating);
 
-  _percentage = _voltage >= 4.1      ? 100 :
-                _voltage <= _minvolt ? 0 :
-                _voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((_voltage-4) / .1))) :
-                _voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((_voltage-_midvolt) / (4-_midvolt)))) :
-                                       ((_voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
+  // Battery voltage/percentage
+    if (!_foundmax) { return true; };
+
+    _max.wake(); 
+      delay(50); 
+      _voltage = double(_max.cellVoltage());
+    _max.hibernate(); 
+
+    _minvolt   = MIN_OP_VOLT_COLD - ((MIN_OP_VOLT_COLD - MIN_OP_VOLT_WARM) * _temprating);
+    _midvolt   = 3.8 - (.1 * _temprating);
+    _4vpercent = 85 + (5 * _temprating);
+
+    _percentage = _voltage >= 4.1      ? 100 :
+                  _voltage <= _minvolt ? 0 :
+                  _voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((_voltage-4) / .1))) :
+                  _voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((_voltage-_midvolt) / (4-_midvolt)))) :
+                                        ((_voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
 
   return true;
 };
