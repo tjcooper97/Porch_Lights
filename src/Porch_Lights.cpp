@@ -260,26 +260,18 @@ void thread_LED() {
     ledson+=shouldallow;
   };
   
-  uint8_t calcdbrightness = 0;
-  uint8_t mbrn = sys.isLateNight() ? 30 : 90; mbrn = mbrn > MAXBRIGHTNESS ? MAXBRIGHTNESS : mbrn;
-  if (sys.battery.foundMax()) {
-    uint8_t sb = 0;
-    if      (bv > 4.03) { sb = 80; }
-    else if (bv > 4.00) { sb = 75; }
-    else if (bv > 3.95) { sb = 70; }
-    else if (bv > 3.90) { sb = 65; }
-    else if (bv > 3.80) { sb = 60; }
-    else if (bv > 3.75) { sb = 55; }
-    else if (bv > 3.70) { sb = 50; }
-    else if (bv > 3.65) { sb = 45; }
-    else if (bv > 3.60) { sb = 40; }
-    else if (bv > 3.55) { sb = 35; }
-    else if (bv > 3.45) { sb = 25; };
-    calcdbrightness = sb < 20 ? 20 : mbrn < sb ? mbrn : sb;
+  uint8_t calcdbrightness;
+  if (sys.isLateNight() || bp < 30) { calcdbrightness = 22; } 
+  else {
+    if      (bp >= 90) { calcdbrightness = 80; } //00 & 03  - 75 & 80
+    else if (bp >= 80) { calcdbrightness = 70; } //92 & 97  - 65 & 70
+    else if (bp >= 70) { calcdbrightness = 60; } //85 & 91  - 60 & 65
+    else if (bp >= 60) { calcdbrightness = 55; } //77 & 86  - 55 & 60
+    else if (bp >= 50) { calcdbrightness = 50; } //70 & 80  - 50 & 60
+    else if (bp >= 40) { calcdbrightness = 40; } //63 & 73  - 40 & 50
+    else if (bp >= 30) { calcdbrightness = 30; } //56 & 66  - 35 & 45
   };
-  if (sys.isLateNight()) { calcdbrightness/=2; };
 
-  calcdbrightness = calcdbrightness < 20 ? 20 : calcdbrightness > mbrn ? mbrn : calcdbrightness;
   haschanged = haschanged || (sys.ledstrip.getBrightness() != calcdbrightness);
 
   if (haschanged) {
