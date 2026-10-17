@@ -713,14 +713,14 @@ bool PorchLightSystem::_recalcHoliday() {
 
 
 bool PorchLightSystem::getNewTimeData() {
-  _latenight = !battery.isChargingAvailable() && (battery.getTemperature() < TEMP_RANGE_UPPER || battery.getVoltage() < 3.8);
+  _latenight = !battery.isChargingAvailable() && (battery.getTemperature() < TEMP_RANGE_UPPER || battery.getPercentage() <= 60);
 
   if (!_foundrtc) { return false; };
   _now = now;
   now = _rtc.getNow();
   if (now.isDST()) { now.addTime(1,0,0,true); };
 
-  // This speeds up the time thread when near midnight so latenight mode & holiday lighting happens more accurately
+  // This speeds up the time thread when near midnight so holiday lighting changes happens more accurately
   if (now.getHour() == 23 && now.getMin() > 50) { thrd[t_time].setInterval(t_time_interval_quick); };
 
   if      (_latenight)        { _latenight = (now.getHour() >= 23 || now.getHour() <= 3); } // max latenight mode time window
