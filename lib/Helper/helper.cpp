@@ -49,20 +49,20 @@ PBattery::PBattery() {
 }
 
 bool PBattery::reset() {
-  _voltage    = 0;
-  _percentage = 0;
+  battery.voltage    = 0;
+  battery.percentage = 0;
 
-  _minvolt = MIN_OP_VOLT_COLD;
-  _midvolt = 3.7;
+  _minvolt   = MIN_OP_VOLT_COLD;
+  _midvolt   = 3.7;
   _4vpercent = 90;
   
-  _temperature[0] = 0;
-  _temperature[1] = 0;
-  _temprating     = 0;
-  _heateron       = false;
+  battery.temperature[0] = 0;
+  battery.temperature[1] = 0;
+  battery.temprating     = 0;
+  battery.heateron       = false;
   
-  _chargeavailable = false;
-  _chargingenabled = false;
+  battery.chargeavailable = false;
+  battery.chargingenabled = false;
 
   return true;
 }
@@ -89,7 +89,7 @@ bool PBattery::foundMax() { return _foundmax; }
 bool PBattery::getNewData() {
   if (!_setupcomplete) { return false; };
   
-  _chargeavailable = (digitalRead(PIN_PGOOD) == LOW);
+  battery.chargeavailable = (digitalRead(PIN_PGOOD) == LOW);
 
   // Battery temp
     digitalWrite(PIN_BTEMP1H, HIGH); digitalWrite(PIN_BTEMP2H, HIGH); delay(50);
@@ -102,9 +102,9 @@ bool PBattery::getNewData() {
       };
     digitalWrite(PIN_BTEMP1H, LOW); digitalWrite(PIN_BTEMP2H, LOW);
 
-    _temperature[0] = (t0/tT)-2; _temperature[1] = (t1/tT)-2;
-    double avtemp = (_temperature[0] + _temperature[1]) / 2;
-    _temprating = avtemp >= TEMP_RANGE_UPPER ? 1 : avtemp <= TEMP_RANGE_LOWER ? 0 : (avtemp - TEMP_RANGE_LOWER) / (TEMP_RANGE_UPPER - TEMP_RANGE_LOWER);
+    battery.temperature[0] = (t0/tT)-2; battery.temperature[1] = (t1/tT)-2;
+    double avtemp = (battery.temperature[0] + battery.temperature[1]) / 2;
+    battery.temprating = avtemp >= TEMP_RANGE_UPPER ? 1 : avtemp <= TEMP_RANGE_LOWER ? 0 : (avtemp - TEMP_RANGE_LOWER) / (TEMP_RANGE_UPPER - TEMP_RANGE_LOWER);
 
 
   // Battery voltage/percentage
@@ -112,18 +112,18 @@ bool PBattery::getNewData() {
 
     _max.wake(); 
       delay(50); 
-      _voltage = double(_max.cellVoltage());
+      battery.voltage = double(_max.cellVoltage());
     _max.hibernate(); 
 
-    _minvolt   = MIN_OP_VOLT_COLD - ((MIN_OP_VOLT_COLD - MIN_OP_VOLT_WARM) * _temprating);
-    _midvolt   = 3.8 - (.1 * _temprating);
-    _4vpercent = 85 + (5 * _temprating);
+    _minvolt   = MIN_OP_VOLT_COLD - ((MIN_OP_VOLT_COLD - MIN_OP_VOLT_WARM) * battery.temprating);
+    _midvolt   = 3.8 - (.1 * battery.temprating);
+    _4vpercent = 85 + (5 * battery.temprating);
 
-    _percentage = _voltage >= 4.1      ? 100 :
-                  _voltage <= _minvolt ? 0 :
-                  _voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((_voltage-4) / .1))) :
-                  _voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((_voltage-_midvolt) / (4-_midvolt)))) :
-                                        ((_voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
+    battery.percentage = battery.voltage >= 4.1      ? 100 :
+                         battery.voltage <= _minvolt ? 0 :
+                         battery.voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((battery.voltage-4) / .1))) :
+                         battery.voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((battery.voltage-_midvolt) / (4-_midvolt)))) :
+                                                       ((battery.voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
 
   return true;
 };
@@ -134,16 +134,16 @@ bool PBattery::getNewData() {
 bool PBattery::isHeatingAllowed() { 
   if (!_setupcomplete) { return false; };
   if (getTemperature() > TEMP_MAX_HEAT) { return false; };
-  if (_foundmax && _voltage < (_chargeavailable ? 3.2 : 3.35)) { return false; };
+  if (_foundmax && battery.voltage < (battery.chargeavailable ? 3.2 : 3.35)) { return false; };
   return true;
 }
-bool PBattery::isHeating() { return _heateron; }
+bool PBattery::isHeating() { return battery.heateron; }
 
 bool PBattery::enableHeater() {
   if (!_setupcomplete) { return false; };
   if (getTemperature() > TEMP_MAX_HEAT) { disableHeater(); return false; };
 
-  _heateron = true;
+  battery.heateron = true;
   digitalWrite(PIN_BHEAT, HIGH);
 
   return true;
@@ -151,37 +151,37 @@ bool PBattery::enableHeater() {
 
 bool PBattery::disableHeater() {
   digitalWrite(PIN_BHEAT, LOW); 
-  _heateron = false;
+  battery.heateron = false;
   return true;
 }
 
 
 
 
-bool   PBattery::isChargingAvailable() { return !_setupcomplete ? false : _chargeavailable; }
+bool   PBattery::isChargingAvailable() { return !_setupcomplete ? false : battery.chargeavailable; }
 bool   PBattery::isChargingAllowed()   { return (_setupcomplete && (getTemperature() >= TEMP_MIN_CHARGE) && (getTemperature() <= TEMP_MAX_CHARGE)); }
-bool   PBattery::isChargingEnabled()   { return !_setupcomplete ? false : _chargingenabled; }
-bool   PBattery::isCharging()          { return !_setupcomplete ? false : (_chargingenabled && _chargeavailable); }
+bool   PBattery::isChargingEnabled()   { return !_setupcomplete ? false : battery.chargingenabled; }
+bool   PBattery::isCharging()          { return !_setupcomplete ? false : (battery.chargingenabled && battery.chargeavailable); }
 bool   PBattery::enableCharging() { 
   if (!isChargingAllowed()) { disableCharging(); return false; };
-  _chargingenabled = true;
+  battery.chargingenabled = true;
   digitalWrite(PIN_CENABLE, LOW);
   return true;
 }
 bool PBattery::disableCharging() {
   digitalWrite(PIN_CENABLE, HIGH);
-  _chargingenabled = false;
+  battery.chargingenabled = false;
   return true;
 }
 
 
 
 
-double PBattery::getVoltage()           { return (!_foundmax || !_setupcomplete) ? 0                : _voltage; }
+double PBattery::getVoltage()           { return (!_foundmax || !_setupcomplete) ? 0                : battery.voltage; }
 double PBattery::getMinOpVoltage()      { return !_setupcomplete                 ? MIN_OP_VOLT_COLD : _minvolt; }
-double PBattery::getPercentage()        { return (!_foundmax || !_setupcomplete) ? 0                : _percentage; }
-double PBattery::getTemperature()       { return !_setupcomplete                 ? 0                : (_temperature[0] + _temperature[1]) / 2; }
-double PBattery::getTemperatureRating() { return !_setupcomplete                 ? 0                : _temprating; }
+double PBattery::getPercentage()        { return (!_foundmax || !_setupcomplete) ? 0                : battery.percentage; }
+double PBattery::getTemperature()       { return !_setupcomplete                 ? 0                : (battery.temperature[0] + battery.temperature[1]) / 2; }
+double PBattery::getTemperatureRating() { return !_setupcomplete                 ? 0                : battery.temprating; }
 
 
 

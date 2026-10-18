@@ -69,29 +69,32 @@
   
   
   
+  struct PBatteryStruct {
+    // Battery info
+      double voltage;
+      double percentage;
+
+    // Temperature control
+      double temperature[2];
+      double temprating; // 0 is TEMP_RANGE_LOWER, 1 is TEMP_RANGE_UPPER
+      bool   heateron;
+
+    // Charge control
+      bool   chargeavailable;
+      bool   chargingenabled;
+  };
+
   class PBattery {
     private:
-    // Statuses
       bool _setupcomplete;
       bool _foundmax;
-    
-    // Battery info
-      double _voltage;
-      double _percentage;
+
+      struct PBatteryStruct battery;
 
     // Dynamic percentage adjustment (adjusted based on battery temperature)
       double _minvolt;
       double _midvolt;
       double _4vpercent;
-
-    // Temperature control
-      double _temperature[2];
-      double _temprating; // 0 is TEMP_RANGE_LOWER, 1 is TEMP_RANGE_UPPER
-      bool   _heateron;
-
-    // Charge control
-      bool   _chargeavailable;
-      bool   _chargingenabled;
 
     public:
       PBattery();
