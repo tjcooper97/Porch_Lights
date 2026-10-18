@@ -69,7 +69,7 @@
   
   
   
-  struct PBatteryStruct {
+  struct BatteryStateStruct {
     // Battery info
       double voltage;
       double percentage;
@@ -89,7 +89,7 @@
       bool _setupcomplete;
       bool _foundmax;
 
-      struct PBatteryStruct battery;
+      struct BatteryStateStruct battery;
 
     // Dynamic percentage adjustment (adjusted based on battery temperature)
       double _minvolt;
