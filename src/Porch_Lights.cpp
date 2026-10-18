@@ -112,45 +112,53 @@ void thread_Battery() {
   while (sys.battery.getTemperature() < TEMP_MAINTAIN && sys.battery.isHeatingAllowed()) {
     if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
     #if DEBUGMODE == true
-      sys.serialPrintDateTime(); Serial.print(F("Heating to maintain temperature of ")); Serial.print(TEMP_MAINTAIN); Serial.println(F("* F"));
+      sys.serialPrintDateTime();
+        Serial.print(F("Heating battery from "));      Serial.print(sys.battery.getTemperature()); 
+        Serial.print(F("*F to maintenance temp of ")); Serial.print(TEMP_MAINTAIN); Serial.println("*F");
     #endif
     sys.sleep(SLEEP_8S,4);
     sys.getNewBatteryData();
   };
 
+
   if (sys.battery.isChargingAvailable()) {
+    if (!sys.battery.isChargingAllowed()) { 
+      sys.battery.disableCharging();
+      #if DEBUGMODE == true
+        sys.serialPrintDateTime();
+        if (!sys.battery.isChargingEnabled()) { Serial.println(F("Charging disabled")); } else { Serial.println(F("Attempted & failed to disable charging")); };
+      #endif
+    };
+    
     while (sys.battery.getTemperature() < TEMP_MIN_CHARGE && sys.battery.isHeatingAllowed()) {
       if (!sys.battery.isHeating()) { if (!sys.battery.enableHeater()) { break; }; };
       #if DEBUGMODE == true
-        sys.serialPrintDateTime(); Serial.print(F("Heating to enable charging at ")); Serial.print(TEMP_MIN_CHARGE); Serial.println(F("* F"));
+        sys.serialPrintDateTime();
+        Serial.print(F("Heating battery from "));           Serial.print(sys.battery.getTemperature()); 
+        Serial.print(F("*F to minimum charging temp of ")); Serial.print(TEMP_MIN_CHARGE); Serial.println("*F");
       #endif
       sys.sleep(SLEEP_8S,4);
       sys.getNewBatteryData();
     };
+
     if (!sys.battery.isChargingEnabled() && sys.battery.isChargingAllowed()) { 
       sys.battery.enableCharging();
       #if DEBUGMODE == true
         sys.serialPrintDateTime();
-        if (sys.battery.isChargingEnabled()) { Serial.println(F("Charging enabled")); } else { Serial.println(F("Failed to enable charging")); };
+        if (sys.battery.isChargingEnabled()) { Serial.println(F("Charging enabled")); } else { Serial.println(F("Attempted & failed to enable charging")); };
       #endif
     };
   };
 
-  if (sys.battery.isChargingEnabled() && !sys.battery.isChargingAllowed()) { 
-    sys.battery.disableCharging();
-    #if DEBUGMODE == true
-      sys.serialPrintDateTime();
-      if (!sys.battery.isChargingEnabled()) { Serial.println(F("Charging disabled")); } else { Serial.println(F("Failed to disable charging")); };
-    #endif
-  };
 
   if (sys.battery.isHeating()) { 
     sys.battery.disableHeater();
     #if DEBUGMODE == true
       sys.serialPrintDateTime();
-      if (!sys.battery.isHeating()) { Serial.println(F("Heating disabled")); } else { Serial.println(F("Failed to disable heating")); };
+      if (!sys.battery.isHeating()) { Serial.println(F("Heating disabled")); } else { Serial.println(F("Attempted & failed to disable heating")); };
     #endif
   };
+  
 
   if (sys.hasLowBattery()) {
     if (sys.getThreadPriority() != tp_HIGH) {
