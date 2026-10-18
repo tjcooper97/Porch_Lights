@@ -351,7 +351,6 @@ bool PLEDStrip::setColor(uint8_t color[3][4]) {
 
 bool    PLEDStrip::isLit()                           { return (_setupcomplete && (_brightness > 0)); }
 uint8_t PLEDStrip::getBrightness()                   { return _brightness; }
-bool    PLEDStrip::updatePixels()                    { return setBrightness(_brightness,0); }
 bool    PLEDStrip::setBrightness(uint8_t brightness) { return setBrightness(brightness,0); }
 bool    PLEDStrip::setBrightness(uint8_t brightness, uint32_t fadedelay) {
   if (!_setupcomplete || brightness > 100 || fadedelay > 50) { return false; };

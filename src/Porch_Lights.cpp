@@ -213,9 +213,8 @@ uint8_t prevholiday   = HOLIDAY_NOTSETUP;
 bool    prevlatenight = false;
 
 void thread_LED() {
-  double bv         = sys.battery.foundMax() ? sys.battery.getVoltage() : 0;
-  double bp         = sys.battery.foundMax() ? sys.battery.getPercentage() : 0;
-  bool   altstairs  = (sys.isLateNight() || bp <= 50);
+  double bp = sys.battery.getPercentage();
+  bool   altstairs = (sys.isLateNight() || bp <= 50);
 
   bool haschanged = ((prevholiday != sys.getCurrentHoliday()) || (prevlatenight != sys.isLateNight()));
   if (haschanged) {

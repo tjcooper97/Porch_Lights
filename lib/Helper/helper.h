@@ -157,7 +157,6 @@
           
       bool    isLit();
       uint8_t getBrightness();
-      bool    updatePixels();
       bool    setBrightness(uint8_t brightness);
       bool    setBrightness(uint8_t brightness, uint32_t fadedelay);
 
