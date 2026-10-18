@@ -89,7 +89,7 @@
       bool _setupcomplete;
       bool _foundmax;
 
-      struct BatteryStateStruct battery;
+      struct BatteryStateStruct _battery;
 
     // Dynamic percentage adjustment (adjusted based on battery temperature)
       double _minvolt;
@@ -122,6 +122,8 @@
       double getPercentage();
       double getTemperature();
       double getTemperatureRating();
+
+      struct BatteryStateStruct getState();
   };
   
 
@@ -199,7 +201,9 @@
 
     // Data logging
       bool _morningdatastored;
+        struct BatteryStateStruct _morningdata;
       bool _eveningdatastored;
+        struct BatteryStateStruct _eveningdata;
       bool _storeBatteryDataToEEPROM(uint16_t sadr);
 
 
