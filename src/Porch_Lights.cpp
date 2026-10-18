@@ -7,7 +7,7 @@ void thread_System();
 void thread_Battery();
 void thread_Sensors();
 void thread_Time();
-void print_EPPROM(uint16_t daystoprint);
+void print_EEPROM(uint16_t daystoprint);
 
   
 void setup() {
@@ -34,7 +34,7 @@ void setup() {
       if (sys.foundRTC()) {
         Serial.println(F("Type anything to print a battery history report from EEPROM"));
         uint32_t stime = millis();
-        while ((millis() - stime) < 7000) { if (Serial.available()) { print_EPPROM(EEPROMREPORTDAYS); break; }; };
+        while ((millis() - stime) < 7000) { if (Serial.available()) { print_EEPROM(EEPROMREPORTDAYS); break; }; };
       };
     #endif
   }
@@ -58,7 +58,7 @@ void loop() { for (byte i = 0; i < thrd_count; i++) { sys.thrd[i].run(false); };
   
 
 
-void print_EPPROM(uint16_t daystoprint) {
+void print_EEPROM(uint16_t daystoprint) {
   daystoprint = daystoprint > 365 ? 365 : daystoprint;
   Serial.print(F(" -Printing last (")); Serial.print(daystoprint); Serial.println(F(") days of EEPROM data"));
   Serial.println(F("   DOY |   Morning    |   Evening    |    Combined     | Charged | Light Usage"));
@@ -158,7 +158,7 @@ void thread_Battery() {
       if (!sys.battery.isHeating()) { Serial.println(F("Heating disabled")); } else { Serial.println(F("Attempted & failed to disable heating")); };
     #endif
   };
-  
+
 
   if (sys.hasLowBattery()) {
     if (sys.getThreadPriority() != tp_HIGH) {
