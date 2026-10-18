@@ -208,7 +208,7 @@ void thread_System() {
 
 
 
-// These two vars are only for thread_LED(), so as to allow for state change tracking
+// These two vars are only for thread_LED()
 uint8_t prevholiday   = HOLIDAY_NOTSETUP;
 bool    prevlatenight = false;
 
@@ -260,7 +260,7 @@ void thread_LED() {
   };
   
   uint8_t calcdbrightness;
-  if (sys.isLateNight() || bp < 30) { calcdbrightness = 22; } 
+  if (sys.isLateNight() || bp < 30) { calcdbrightness = 20; } 
   else {
                                                  // warm & cold volt - og percent
     if      (bp >= 90) { calcdbrightness = 80; } // 4.00 & 4.03      - 75 & 80
