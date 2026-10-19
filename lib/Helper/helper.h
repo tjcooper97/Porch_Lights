@@ -82,6 +82,18 @@
     // Charge control
       bool   chargeavailable;
       bool   chargingenabled;
+
+    virtual void reset() {
+      voltage    = 0;
+      percentage = 0;
+
+      temperature[0] = 0; temperature[1] = 0;
+      temprating     = 0;
+      heateron       = false;
+
+      chargeavailable = false;
+      chargingenabled = false;
+    };
   };
 
   class PBattery {
@@ -178,6 +190,19 @@
 
 
 
+  struct SystemBatteryStateStruct : public BatteryStateStruct {
+    bool stored;
+
+    SystemBatteryStateStruct& operator=(const BatteryStateStruct& state) {
+      BatteryStateStruct::operator=(state);
+      return *this;
+    }
+
+    void reset() override {
+      BatteryStateStruct::reset();
+      stored = false;
+    };
+  };
 
   class PorchLightSystem {
     private:
@@ -199,12 +224,10 @@
     // Sensor data
       uint8_t  _ambientlight;
 
-    // Data logging
-      bool _morningdatastored;
-        struct BatteryStateStruct _morningdata;
-      bool _eveningdatastored;
-        struct BatteryStateStruct _eveningdata;
+    // Battery Data logging
       bool _storeBatteryDataToEEPROM(uint16_t sadr);
+      struct SystemBatteryStateStruct _morningbattery;
+      struct SystemBatteryStateStruct _eveningbattery;
 
 
     public:

@@ -49,20 +49,11 @@ PBattery::PBattery() {
 }
 
 bool PBattery::reset() {
-  _battery.voltage    = 0;
-  _battery.percentage = 0;
+  _battery.reset();
 
   _minvolt   = MIN_OP_VOLT_COLD;
   _midvolt   = 3.7;
   _4vpercent = 90;
-  
-  _battery.temperature[0] = 0;
-  _battery.temperature[1] = 0;
-  _battery.temprating     = 0;
-  _battery.heateron       = false;
-  
-  _battery.chargeavailable = false;
-  _battery.chargingenabled = false;
 
   return true;
 }
@@ -465,8 +456,8 @@ PorchLightSystem::PorchLightSystem() {
 
   _ambientlight = 0;
 
-  _morningdatastored = false;
-  _eveningdatastored = false;
+  _morningbattery.reset();
+  _eveningbattery.reset();
 
   now.setRegion(SER_MIDWEST);
   now.setDateFormat(FORMAT_DATE_US);
@@ -734,9 +725,18 @@ bool PorchLightSystem::getNewTimeData() {
     updateLEDColor();
   };
 
-  if      (now.getHour() == 0)                                                                                               { _morningdatastored = false; _eveningdatastored = false; }
-  else if (!_morningdatastored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) { _morningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2))); }
-  else if (!_eveningdatastored && now.getTimeOfDay() == TOD_AFTERNOON && now.getSunsetMinutes()-40  < now.getTotalMinutes()) { _eveningdatastored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE); };
+  if (now.getHour() == 0) {
+    _morningbattery.stored = false;
+    _eveningbattery.stored = false;
+  }
+  else if (!_morningbattery.stored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) {
+    _morningbattery = battery.getState();
+    _morningbattery.stored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
+  }
+  else if (!_eveningbattery.stored && now.getTimeOfDay() == TOD_AFTERNOON && now.getSunsetMinutes()-40  < now.getTotalMinutes()) {
+    _eveningbattery = battery.getState();
+    _eveningbattery.stored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE);
+  };
 
   #if DEBUGMODE == true
     serialPrintDateTime();
