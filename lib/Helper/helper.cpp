@@ -458,6 +458,7 @@ PorchLightSystem::PorchLightSystem() {
 
   _morningbattery.reset();
   _eveningbattery.reset();
+  _preveveningbattery.reset();
 
   now.setRegion(SER_MIDWEST);
   now.setDateFormat(FORMAT_DATE_US);
@@ -734,6 +735,7 @@ bool PorchLightSystem::getNewTimeData() {
     _morningbattery.stored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
   }
   else if (!_eveningbattery.stored && now.getTimeOfDay() == TOD_AFTERNOON && now.getSunsetMinutes()-40  < now.getTotalMinutes()) {
+    _preveveningbattery = _eveningbattery;
     _eveningbattery = battery.getState();
     _eveningbattery.stored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE);
   };

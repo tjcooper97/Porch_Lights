@@ -228,6 +228,7 @@
       bool _storeBatteryDataToEEPROM(uint16_t sadr);
       struct SystemBatteryStateStruct _morningbattery;
       struct SystemBatteryStateStruct _eveningbattery;
+      struct SystemBatteryStateStruct _preveveningbattery;
 
 
     public:
