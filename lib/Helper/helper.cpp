@@ -712,6 +712,17 @@ bool PorchLightSystem::getNewTimeData() {
   now = _rtc.getNow();
   if (now.isDST()) { now.addTime(1,0,0,true); };
 
+  // If the battery is below a set level & we didn't get a certain amount of charge today, then we wanna have an extended latenight mode
+    // We don't do this based on .stored because it gets reset to false at midnight, meaning we'd not have a full extended latenight mode
+    // The whole point of this check is for the initial bootup edge case, where we may have missed morning/evening states due to bootup timing
+  if (!_latenight && (now.getTimeOfDay() == TOD_NIGHT || now.getTimeOfDay() == TOD_MIDNIGHT || now.getTimeOfDay() == TOD_MORNNIGHT) && 
+      _morningbattery.voltage > 0 && _eveningbattery.voltage > 0 && battery.getPercentage() < 80) {
+
+    if ((_eveningbattery.voltage - _morningbattery.voltage) < (_preveveningbattery.voltage == 0 ? .06 : _preveveningbattery.voltage - _morningbattery.voltage)) { 
+      _latenight = true; 
+    };
+  };
+
   // This speeds up the time thread when near midnight so holiday lighting changes happens more accurately
   if (now.getHour() == 23 && now.getMin() > 50) { thrd[t_time].setInterval(t_time_interval_quick); };
 
