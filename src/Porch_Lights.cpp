@@ -32,7 +32,7 @@ void setup() {
       wdt_enable(WDTLen);
     #else
       if (sys.foundRTC()) {
-        Serial.println(F("Type anything to print a battery history report from EEPROM"));
+        Serial.println(F("Type anything to print a battery history report"));
         uint32_t stime = millis();
         while ((millis() - stime) < 7000) { if (Serial.available()) { print_EEPROM(EEPROMREPORTDAYS); break; }; };
       };
@@ -57,39 +57,54 @@ void loop() { for (byte i = 0; i < thrd_count; i++) { sys.thrd[i].run(false); };
 
   
 
+#if DEBUGMODE == true
+  void print_EEPROM(uint16_t daystoprint) {
+    daystoprint = daystoprint > 365 ? 365 : daystoprint;
+    Serial.println("");
+    Serial.println(F("DOY|Morning *F|Morning Volt|Evening *F|Evening Volt|Combined *F|Combined Volt|Charged|Light Usage"));
 
-void print_EEPROM(uint16_t daystoprint) {
-  daystoprint = daystoprint > 365 ? 365 : daystoprint;
-  Serial.print(F(" -Printing last (")); Serial.print(daystoprint); Serial.println(F(") days of EEPROM data"));
-  Serial.println(F("   DOY |   Morning    |   Evening    |    Combined     | Charged | Light Usage"));
+    uint16_t dayslastyear = isLeapYear(sys.now.getYear()-1) ? 366 : 365;
+    uint16_t startdoy = sys.now.getDayOfYear() >= daystoprint ? sys.now.getDayOfYear() - daystoprint : dayslastyear - (daystoprint - sys.now.getDayOfYear()); // 0 based day of year
+    uint16_t currdoy = startdoy;
+    bool     inpreviousyear = (sys.now.getDayOfYear() < daystoprint);
+    uint16_t nextdoy = currdoy+1;
+    if (inpreviousyear && (nextdoy >= dayslastyear)) { nextdoy = 0; inpreviousyear = false; }; // from here forward, inpreviousyear relates to nextdoy, NOT currdoy (look at the math at the end of the loop)
+    
+    uint8_t ttemp1, ttemp2;
+    double  ttempa;
+    double  tvolt1, tvolt2, tvolta, tvoltn;
 
-  uint16_t dayslastyear = isLeapYear(sys.now.getYear()-1) ? 366 : 365;
-  uint16_t startdoy = sys.now.getDayOfYear() >= daystoprint ? sys.now.getDayOfYear() - daystoprint : dayslastyear - (daystoprint - sys.now.getDayOfYear()); // 0 based day of year
-  uint16_t currdoy = startdoy;
-  bool     inpreviousyear = (sys.now.getDayOfYear() < daystoprint);
-  uint16_t nextdoy = currdoy+1;
-  if (inpreviousyear && (nextdoy >= dayslastyear)) { nextdoy = 0; inpreviousyear = false; }; // from here forward, inpreviousyear relates to nextdoy, NOT currdoy (look at the math at the end of the loop)
-  
-  uint8_t ttemp1; uint8_t ttemp2; double ttempa;
-  double  tvolt1; double  tvolt2; double tvolta; double tvoltn;
+    uint16_t cadr, nadr;
+    for (uint16_t printday = 0; printday < daystoprint; printday++) {
+      nadr = EPP_DATA_START + (nextdoy * (EPP_DATA_SIZE*2));
+      cadr = EPP_DATA_START + (currdoy * (EPP_DATA_SIZE*2));
 
-  uint16_t cadr; uint16_t nadr;
-  for (uint16_t printday = 0; printday < daystoprint; printday++) {
-    nadr = EPP_DATA_START + (nextdoy * (EPP_DATA_SIZE*2));
-    cadr = EPP_DATA_START + (currdoy * (EPP_DATA_SIZE*2));
+      ttemp1 = EEPROM.read(cadr);
+      ttemp2 = EEPROM.read(cadr+EPP_DATA_SIZE);
+      ttempa = (double(ttemp1)+double(ttemp2))/2;
 
-    Serial.print(F("   ")); Serial.print(currdoy+1); if (currdoy < 9) { Serial.print(F("  ")); } else if (currdoy < 99) { Serial.print(F(" ")); }; Serial.print(F(" | "));
-    ttemp1 = EEPROM.read(cadr);                     ttemp2 = EEPROM.read(cadr+EPP_DATA_SIZE);                     ttempa = (double(ttemp1)+double(ttemp2))/2;
-    tvolt1 = (double(EEPROM.read(cadr+1))+200)/100; tvolt2 = (double(EEPROM.read(cadr+EPP_DATA_SIZE+1))+200)/100; tvolta = (tvolt1+tvolt2)/2;                 tvoltn = (double(EEPROM.read(nadr+1))+200)/100;
-    Serial.print(ttemp1); Serial.print(F("*F")); if (ttemp1 < 10) { Serial.print(" "); }; Serial.print(F(" - ")); Serial.print(tvolt1); Serial.print(F("v | "));
-    Serial.print(ttemp2); Serial.print(F("*F")); if (ttemp2 < 10) { Serial.print(" "); }; Serial.print(F(" - ")); Serial.print(tvolt2); Serial.print(F("v | "));
-    Serial.print(ttempa); Serial.print(F("*F")); if (ttempa < 10) { Serial.print(" "); }; Serial.print(F(" - ")); Serial.print(tvolta); Serial.print(F("v |  "));
-    Serial.print(tvolt2-tvolt1); Serial.print(F("v  |    ")); Serial.print(printday == (daystoprint-1) ? 0.00 : tvolt2-tvoltn); Serial.println(F("v"));
+      tvolt1 = (double(EEPROM.read(cadr+1))+200)/100;
+      tvolt2 = (double(EEPROM.read(cadr+EPP_DATA_SIZE+1))+200)/100;
+      tvolta = (tvolt1+tvolt2)/2;
+      tvoltn = (double(EEPROM.read(nadr+1))+200)/100;
 
-    currdoy = nextdoy; nextdoy++;
-    if (inpreviousyear && nextdoy > (dayslastyear-1)) { inpreviousyear = false; nextdoy = 0; };
-  };
-}
+      Serial.print(currdoy+1);     Serial.print(F("|"));
+      Serial.print(ttemp1);        Serial.print(F("|")); 
+      Serial.print(tvolt1);        Serial.print(F("|"));
+      Serial.print(ttemp2);        Serial.print(F("|")); 
+      Serial.print(tvolt2);        Serial.print(F("|"));
+      Serial.print(ttempa);        Serial.print(F("|")); 
+      Serial.print(tvolta);        Serial.print(F("|"));
+      Serial.print(tvolt2-tvolt1); Serial.print(F("|")); 
+      Serial.println(printday == (daystoprint-1) ? 0.00 : tvolt2-tvoltn);
+
+      currdoy = nextdoy; nextdoy++;
+      if (inpreviousyear && nextdoy > (dayslastyear-1)) { inpreviousyear = false; nextdoy = 0; };
+    };
+
+    Serial.println("");
+  }
+#endif
 
 
 
