@@ -4,7 +4,11 @@
   #include "settings.h"
   #include "led_positions.h"
   #include <EEPROM.h>
-    #define EPP_VERIFY_VALUE     17
+    #define EPP_VERIFY_VALUE     0
+      #define EPV_VERIFY_VALUE   17
+    #define EPP_YEAR             1
+    #define EPP_MONTH            2
+    #define EPP_DAY              3
     #define EPP_DATA_START       1000
     #define EPP_DATA_SIZE        2
     #define EPP_DATA_MAX_ENTRIES 366
@@ -221,12 +225,14 @@
       uint8_t    _holiday;
       bool       _latenight;
       bool       _recalcHoliday();
+      bool       _updateDateInEEPROM();
 
     // Sensor data
       uint8_t  _ambientlight;
 
     // Battery Data logging
       bool _storeBatteryDataToEEPROM(uint16_t sadr);
+      bool _resetBatteryDataInEEPROM(uint16_t sadr);
       struct SystemBatteryStateStruct _morningbattery;
       struct SystemBatteryStateStruct _eveningbattery;
       struct SystemBatteryStateStruct _preveveningbattery;

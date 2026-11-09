@@ -572,19 +572,84 @@ bool PorchLightSystem::begin() {
   #if DEBUGMODE == true
     Serial.print(F("Verifying EEPROM Integrity... "));
   #endif
-    if (EEPROM.read(0) != EPP_VERIFY_VALUE) {
+    if (EEPROM.read(EPP_VERIFY_VALUE) != EPV_VERIFY_VALUE) {
       #if DEBUGMODE == true
         Serial.println();
         Serial.println(F("  >EEPROM is in an invalid format!"));
         Serial.print(F("  >Reformatting EEPROM... "));
       #endif
-      wdt_disable();
-      for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,EPP_VERIFY_VALUE);
-      wdt_enable(WDTLen);
+        wdt_disable();
+        for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(EPP_VERIFY_VALUE,EPV_VERIFY_VALUE);
+        _updateDateInEEPROM();
+        wdt_enable(WDTLen);
+      #if DEBUGMODE == true
+        Serial.println(F("Complete!"));
+      #endif
+    }
+    else if (_foundrtc) {
+      #if DEBUGMODE == true
+        Serial.println(F("Complete!"));
+        Serial.print(F("  >Loading previous battery states from EEPROM... "));
+      #endif
+
+      if ((uint16_t(EEPROM.read(EPP_YEAR))+2000) != now.getYear() || EEPROM.read(EPP_MONTH) != now.getMon() || EEPROM.read(EPP_DAY) != now.getDay()) {
+        _resetBatteryDataInEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
+        _updateDateInEEPROM();
+        #if DEBUGMODE == true
+          Serial.println(F("Aborted! (previous running date was not today)"));
+        #endif
+      }
+      else {
+        uint16_t pep = now.getDayOfYear() - 1;
+        if (pep == 0) { pep = getDaysInYear(now.getYear()-1); };
+        pep--; // getDayOfYear starts at 1, we need to start at 0
+        pep = (EPP_DATA_START + (EPP_DATA_SIZE * (pep*2)) + EPP_DATA_SIZE);
+
+        uint16_t tmp = (EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
+        uint16_t tep = (EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)) + EPP_DATA_SIZE);
+
+        _preveveningbattery.voltage = EEPROM.read(pep+1);
+        _morningbattery.voltage     = EEPROM.read(tmp+1);
+        _eveningbattery.voltage     = EEPROM.read(tep+1);
+
+        if (_preveveningbattery.voltage == 0 || (_morningbattery.voltage == 0 && _eveningbattery.voltage != 0)) {
+          _preveveningbattery.reset();
+          _morningbattery.reset();
+          _eveningbattery.reset();
+          #if DEBUGMODE == true
+            Serial.println(F("Aborted! (not available or bad data)"));
+          #endif
+        }
+        else {
+          _preveveningbattery.stored = true;
+          _preveveningbattery.voltage = (_preveveningbattery.voltage+200)/100;
+          _preveveningbattery.temperature[0] = EEPROM.read(pep);
+          _preveveningbattery.temperature[1] = _preveveningbattery.temperature[0];
+
+          if (_morningbattery.voltage > 0) {
+            _morningbattery.stored = true;
+            _morningbattery.voltage = (_morningbattery.voltage+200)/100;
+            _morningbattery.temperature[0] = EEPROM.read(tmp);
+            _morningbattery.temperature[1] = _morningbattery.temperature[0];
+
+            if (_eveningbattery.voltage > 0) {
+              _eveningbattery.stored = true;
+              _eveningbattery.voltage = (_eveningbattery.voltage+200)/100;
+              _eveningbattery.temperature[0] = EEPROM.read(tep);
+              _eveningbattery.temperature[1] = _eveningbattery.temperature[0];
+            };
+          };
+          #if DEBUGMODE == true
+            Serial.println(F("Complete!"));
+          #endif
+        };
+      };
+    }
+    else {
+      #if DEBUGMODE == true
+        Serial.println(F("Complete!"));
+      #endif
     };
-  #if DEBUGMODE == true
-    Serial.println(F("Complete!"));
-  #endif
 
 
   wdt_reset();
@@ -751,17 +816,29 @@ bool PorchLightSystem::getNewTimeData() {
 
   if (now.getTimeOfDay() != _now.getTimeOfDay()) { thrd[t_sensors].setPaused((!DEBUGMODE && now.getTimeOfDay() != TOD_DAWN && now.getTimeOfDay() != TOD_SUNRISE && now.getTimeOfDay() != TOD_SUNSET && now.getTimeOfDay() != TOD_DUSK)); };
 
-  if (now.getDay() != _now.getDay() || _holiday == HOLIDAY_NOTSETUP) { 
-    thrd[t_time].setInterval(DEBUGMODE ? t_time_interval_debug : t_time_interval_normal); // reset interval here to avoid dst weirdness
-    _recalcHoliday();
-    updateLEDColor();
-  };
 
-  if (now.getHour() == 0) {
+  bool shouldupdateleds = false;
+
+  if (_holiday == HOLIDAY_NOTSETUP) { _recalcHoliday(); shouldupdateleds = true; };
+
+  if (now.getDay() != _now.getDay()) { 
+    thrd[t_time].setInterval(DEBUGMODE ? t_time_interval_debug : t_time_interval_normal); // reset interval here to avoid dst weirdness
+
+    _recalcHoliday();
+
     _morningbattery.stored = false;
     _eveningbattery.stored = false;
-  }
-  else if (!_morningbattery.stored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) {
+    _resetBatteryDataInEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
+
+    _updateDateInEEPROM();
+
+    shouldupdateleds = true;
+  };
+
+  if (shouldupdateleds) { updateLEDColor(); };
+
+
+  if (!_morningbattery.stored && now.getTimeOfDay() == TOD_MORNING   && now.getSunriseMinutes()+30 < now.getTotalMinutes()) {
     _morningbattery = battery.getState();
     _morningbattery.stored = _storeBatteryDataToEEPROM(EPP_DATA_START + (EPP_DATA_SIZE * ((now.getDayOfYear()-1)*2)));
   }
@@ -791,6 +868,19 @@ bool PorchLightSystem::getNewTimeData() {
 bool PorchLightSystem::_storeBatteryDataToEEPROM(uint16_t sadr) {
   EEPROM.update(sadr,  uint8_t(battery.getTemperature()));
   EEPROM.update(sadr+1,uint8_t((battery.getVoltage()*100)-200));
+  return true;
+}
+
+bool PorchLightSystem::_resetBatteryDataInEEPROM(uint16_t sadr) {
+  for (uint16_t ere = 0; ere < (EPP_DATA_SIZE*2); ere++) { EEPROM.update(sadr+ere,0); };
+  return true;
+}
+
+bool PorchLightSystem::_updateDateInEEPROM() {
+  if (!_foundrtc) { return false; }
+  EEPROM.update(EPP_YEAR,  uint8_t(now.getYear()-2000));
+  EEPROM.update(EPP_MONTH, now.getMon());
+  EEPROM.update(EPP_DAY,   now.getDay());
   return true;
 }
 
