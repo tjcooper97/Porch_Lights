@@ -7,7 +7,10 @@ void thread_System();
 void thread_Battery();
 void thread_Sensors();
 void thread_Time();
-void print_EEPROM(uint16_t daystoprint);
+
+#if DEBUGMODE == true
+  void print_EEPROM(uint16_t daystoprint);
+#endif
 
   
 void setup() {
@@ -23,10 +26,9 @@ void setup() {
   sys.setDefaultColors(defaultcolors);
 
   if (sys.begin()) {
+    wdt_disable();
     #if DEBUGMODE == false
-      wdt_disable();
-        sys.ledstrip.demo(350);
-      wdt_enable(WDTLen);
+      sys.ledstrip.demo(350);
     #else
       if (sys.foundRTC()) {
         Serial.println(F("Type anything to print a battery history report"));
@@ -34,6 +36,7 @@ void setup() {
         while ((millis() - stime) < 7000) { if (Serial.available()) { print_EEPROM(EEPROMREPORTDAYS); break; }; };
       };
     #endif
+    wdt_enable(WDTLen);
   }
   else {
     #if DEBUGMODE == true
@@ -234,8 +237,8 @@ bool    prevlatenight = false;
 
 void thread_LED() {
   double bp =  sys.battery.getPercentage();
-  if      (sys.battery.getTemperature() < TEMP_RANGE_LOWER) { bp > 50 ? 50 : bp; }
-  else if (sys.battery.getTemperature() < TEMP_RANGE_UPPER) { bp > 75 ? 75 : bp; };
+  if      (sys.battery.getTemperature() < TEMP_RANGE_LOWER) { bp = bp > 50 ? 50 : bp; }
+  else if (sys.battery.getTemperature() < TEMP_RANGE_UPPER) { bp = bp > 75 ? 75 : bp; };
 
   bool altstairs = (sys.isLateNight() || bp <= 50);
 

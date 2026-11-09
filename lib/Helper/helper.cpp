@@ -575,7 +575,7 @@ bool PorchLightSystem::begin() {
     if (EEPROM.read(0) != EPP_VERIFY_VALUE) {
       #if DEBUGMODE == true
         Serial.println();
-        Serial.println(F("  >EEPROM in invalid format!"));
+        Serial.println(F("  >EEPROM is in an invalid format!"));
         Serial.print(F("  >Reformatting EEPROM... "));
       #endif
       wdt_disable();
