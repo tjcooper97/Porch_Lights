@@ -236,8 +236,11 @@ uint8_t prevholiday   = HOLIDAY_NOTSETUP;
 bool    prevlatenight = false;
 
 void thread_LED() {
-  double bp = sys.battery.getPercentage();
-  bool   altstairs = (sys.isLateNight() || bp <= 50);
+  double bp =  sys.battery.getPercentage();
+  if      (sys.battery.getTemperature() < TEMP_RANGE_LOWER) { bp > 50 ? 50 : bp; }
+  else if (sys.battery.getTemperature() < TEMP_RANGE_UPPER) { bp > 75 ? 75 : bp; };
+
+  bool altstairs = (sys.isLateNight() || bp <= 50);
 
   bool haschanged = ((prevholiday != sys.getCurrentHoliday()) || (prevlatenight != sys.isLateNight()));
   if (haschanged) {
@@ -270,7 +273,7 @@ void thread_LED() {
     else if (lss == SP_FRONT2)                         { shouldallow = sys.isLateNight() ? false : bp >= 33; }
     else if (lss == SP_RITER)                          { shouldallow = bp >= 27; }
     else if (lss == SP_STAIR || lsi == SP_STAIRA_1)    { 
-      if (bp < 14) { shouldallow = false; }
+      if (bp < 15) { shouldallow = false; }
       else {
         if      (lsi == SP_STAIR_1 || lsi == SP_STAIR_4) { shouldallow = true; }
         else if (lsi == SP_STAIRA_1)                     { shouldallow = altstairs; }
