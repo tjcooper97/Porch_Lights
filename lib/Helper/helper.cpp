@@ -114,7 +114,7 @@ bool PBattery::getNewData() {
                           _battery.voltage <= _minvolt ? 0 :
                           _battery.voltage >  4        ? (_4vpercent + ((100-_4vpercent) * ((_battery.voltage-4) / .1))) :
                           _battery.voltage >= _midvolt ? (50 + ((_4vpercent-50) * ((_battery.voltage-_midvolt) / (4-_midvolt)))) :
-                                                         ((_battery.voltage-_minvolt) / (_midvolt-_minvolt)) * .5;
+                                                         ((_battery.voltage-_minvolt) / (_midvolt-_minvolt)) * 50;
 
   return true;
 };
