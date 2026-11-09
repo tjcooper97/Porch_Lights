@@ -4,8 +4,9 @@
   #include "settings.h"
   #include "led_positions.h"
   #include <EEPROM.h>
-    #define EPP_DATA_START 1000
-    #define EPP_DATA_SIZE  2
+    #define EPP_VERIFY_VALUE     17
+    #define EPP_DATA_START       1000
+    #define EPP_DATA_SIZE        2
     #define EPP_DATA_MAX_ENTRIES 366
   #include <avr/wdt.h>
     #define  WDTLen WDTO_2S

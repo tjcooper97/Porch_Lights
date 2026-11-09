@@ -22,10 +22,7 @@ void setup() {
   uint8_t defaultcolors[3][4] = {{0,0,0,255}, {0,0,0,0}, {0,0,0,0}};
   sys.setDefaultColors(defaultcolors);
 
-  wdt_reset();
   if (sys.begin()) {
-    if (EEPROM.read(0) != 17) { for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,17); };
-
     #if DEBUGMODE == false
       wdt_disable();
         sys.ledstrip.demo(350);

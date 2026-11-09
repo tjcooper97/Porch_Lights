@@ -570,6 +570,25 @@ bool PorchLightSystem::begin() {
 
   wdt_reset();
   #if DEBUGMODE == true
+    Serial.print(F("Verifying EEPROM Integrity... "));
+  #endif
+    if (EEPROM.read(0) != EPP_VERIFY_VALUE) {
+      #if DEBUGMODE == true
+        Serial.println();
+        Serial.println(F("  >EEPROM in invalid format!"));
+        Serial.print(F("  >Reformatting EEPROM... "));
+      #endif
+      wdt_disable();
+      for (uint16_t cep = 1; cep < EEPROM.length(); cep++) { EEPROM.update(cep,0); }; EEPROM.update(0,EPP_VERIFY_VALUE);
+      wdt_enable(WDTLen);
+    };
+  #if DEBUGMODE == true
+    Serial.println(F("Complete!"));
+  #endif
+
+
+  wdt_reset();
+  #if DEBUGMODE == true
     serialPrintDateTime(); Serial.println(F("Setup Complete!"));
   #endif
   _setupcomplete = true;
