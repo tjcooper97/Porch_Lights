@@ -472,8 +472,8 @@ PorchLightSystem::PorchLightSystem() {
 
 bool PorchLightSystem::begin() {
   if (_setupcomplete) { return true; };
-  wdt_reset();
 
+  wdt_reset();
   #if DEBUGMODE == true
     Serial.begin(115200);
     Serial.println(F("Coopers Porch Lights"));
@@ -510,10 +510,10 @@ bool PorchLightSystem::begin() {
   #endif
   
 
+  wdt_reset();
   #if DEBUGMODE == true
     Serial.print(F("Searching for DS3231... "));
   #endif
-    wdt_reset();
     if (_rtc.begin()) {
       _foundrtc = true;
 
@@ -547,10 +547,10 @@ bool PorchLightSystem::begin() {
     };
   
 
+  wdt_reset();
   #if DEBUGMODE == true
     Serial.print(F("Setting up Battery... "));
   #endif
-    wdt_reset();
     if (battery.begin()) {
       #if DEBUGMODE == true
         Serial.println(F("Complete!"));
@@ -568,6 +568,7 @@ bool PorchLightSystem::begin() {
     };
 
 
+  wdt_reset();
   #if DEBUGMODE == true
     serialPrintDateTime(); Serial.println(F("Setup Complete!"));
   #endif
