@@ -702,9 +702,10 @@ bool PorchLightSystem::sleep(period_t period, uint8_t multiplier) {
 
 bool PorchLightSystem::getNewSensorData() {
   _ambientlight = 0;
-  for (uint8_t nalr = 0; nalr < 3; nalr++) { _ambientlight += uint8_t(map(analogRead(PIN_OLITE),0,1024,100,0)); };
-  _ambientlight/=3;
-  _ambientlight = _ambientlight > 100 ? 100 : _ambientlight;
+  uint16_t newal = 0;
+  for (uint8_t nalr = 0; nalr < 3; nalr++) { newal += uint16_t(map(analogRead(PIN_OLITE),0,1024,100,0)); };
+  newal/=3;
+  _ambientlight = newal > 100 ? 100 : uint8_t(newal);
   
   #if DEBUGMODE == true
     serialPrintDateTime();
